@@ -17,6 +17,31 @@ class StudyHubScreen extends ConsumerStatefulWidget {
 class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
   String _selectedSubjectFilter = 'Tous';
 
+  void _showImportBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return _ImportPackSheet(
+          onImport: (code) async {
+            final cleanId = code.trim().replaceFirst('EDU-', '').toLowerCase();
+            final messenger = ScaffoldMessenger.of(context);
+            await ref.read(studyPacksRepositoryProvider).clone(cleanId);
+            ref.invalidate(studyPacksProvider);
+            messenger.showSnackBar(
+              const SnackBar(
+                content: Text('📥 Pack d\'étude importé avec succès !'),
+                backgroundColor: AppColors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final packsAsync = ref.watch(studyPacksProvider);
@@ -174,6 +199,75 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Premium Handcrafted Import Code Button ──
+                  GestureDetector(
+                    onTap: () => _showImportBottomSheet(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceGlass,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.accent.withValues(alpha: .3),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accent.withValues(alpha: .06),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent.withValues(alpha: .14),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.download_rounded,
+                              color: AppColors.accentBright,
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Importer un pack d\'étude',
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                const Text(
+                                  'Saisissez un code de partage mobile pour cloner un pack public.',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            color: AppColors.textMuted,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -732,6 +826,203 @@ class _CountChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  IMPORT PACK SHEET
+// ══════════════════════════════════════════════════════════
+
+class _ImportPackSheet extends StatefulWidget {
+  const _ImportPackSheet({required this.onImport});
+
+  final Future<void> Function(String code) onImport;
+
+  @override
+  State<_ImportPackSheet> createState() => _ImportPackSheetState();
+}
+
+class _ImportPackSheetState extends State<_ImportPackSheet> {
+  final _controller = TextEditingController();
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final code = _controller.text.trim();
+    if (code.isEmpty) {
+      setState(() => _error = 'Le code ne peut pas être vide');
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      await widget.onImport(code);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e.toString().contains('404')
+              ? 'Pack non trouvé. Vérifiez le code.'
+              : 'Erreur lors de l\'importation. Réessayez.';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceSecondary,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border(top: BorderSide(color: AppColors.border, width: 1.5)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: .15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.download_rounded,
+                    color: AppColors.accentBright,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Importer un Pack',
+                  style: GoogleFonts.outfit(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Entrez le code de partage mobile (ex: EDU-60F8BA5A...) pour cloner ce pack d\'étude public dans votre espace personnel.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _controller,
+              style: GoogleFonts.jetBrainsMono(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: InputDecoration(
+                hintText: 'EDU-60F8BA5A...',
+                hintStyle: TextStyle(
+                  color: AppColors.textMuted,
+                  fontFamily: GoogleFonts.jetBrainsMono().fontFamily,
+                ),
+                filled: true,
+                fillColor: AppColors.bg,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: const TextStyle(color: AppColors.red, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ],
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _loading ? null : () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      side: const BorderSide(color: AppColors.border),
+                      minimumSize: const Size(0, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text('Annuler', style: TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _loading ? null : _submit,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      minimumSize: const Size(0, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Importer', style: TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

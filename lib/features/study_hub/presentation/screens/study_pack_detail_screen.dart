@@ -86,6 +86,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
 
   void _showShareDialog(String packId) {
     final shareLink = 'http://localhost:4200/study-hub/shared/$packId';
+    final mobileCode = 'EDU-${packId.toUpperCase()}';
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -127,14 +128,26 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Le pack d\'étude est désormais public. Partagez ce lien avec vos collègues ou étudiants :',
+              'Le pack d\'étude est désormais public. Partagez-le avec les liens et codes ci-dessous :',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 13,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
+
+            // ── WEB APPLICATION LINK ──
+            Text(
+              'LIEN DE L\'APPLICATION WEB',
+              style: GoogleFonts.inter(
+                color: AppColors.textMuted,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -160,7 +173,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                       Clipboard.setData(ClipboardData(text: shareLink));
                       ScaffoldMessenger.of(ctx).showSnackBar(
                         const SnackBar(
-                          content: Text('Lien copié !'),
+                          content: Text('Lien web copié !'),
                           backgroundColor: AppColors.green,
                           behavior: SnackBarBehavior.floating,
                         ),
@@ -182,14 +195,75 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+
+            // ── MOBILE APP CODE ──
+            Text(
+              'CODE DE L\'APPLICATION MOBILE',
+              style: GoogleFonts.inter(
+                color: AppColors.textMuted,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.bg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      mobileCode,
+                      style: GoogleFonts.jetBrainsMono(
+                        color: AppColors.textPrimary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: mobileCode));
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(
+                          content: Text('Code mobile copié !'),
+                          backgroundColor: AppColors.green,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: .15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.content_copy_rounded,
+                        size: 14,
+                        color: AppColors.accentBright,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
             const Row(
               children: [
                 Icon(Icons.check_circle_outline_rounded, color: AppColors.green, size: 14),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Lien copié dans le presse-papiers.',
+                    'Lien copié par défaut dans le presse-papiers.',
                     style: TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 11.5,
