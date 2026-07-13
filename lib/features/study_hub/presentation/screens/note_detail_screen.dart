@@ -235,18 +235,43 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
       ),
       floatingActionButton: _editMode
           ? null
-          : FloatingActionButton.extended(
-              heroTag: 'note-edit',
-              onPressed: () {
+          : GestureDetector(
+              onTap: () {
                 _initForm();
                 setState(() => _editMode = true);
               },
-              backgroundColor: _accent,
-              foregroundColor: Colors.white,
-              elevation: 10,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-              icon: const Icon(Icons.edit_rounded, size: 19),
-              label: const Text('Modifier', style: TextStyle(fontWeight: FontWeight.w800)),
+              child: Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceGlass,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: _accent.withValues(alpha: .35), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _accent.withValues(alpha: 0.2),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 17, color: _accent),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Modifier',
+                      style: GoogleFonts.inter(
+                        color: _accent,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
     );
   }
@@ -286,19 +311,24 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                     else
                       Padding(
                         padding: const EdgeInsets.only(right: 12),
-                        child: FilledButton(
+                        child: TextButton(
                           onPressed: _saveEdits,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: _accent,
-                            minimumSize: const Size(0, 38),
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          style: TextButton.styleFrom(
+                            backgroundColor: _accent.withValues(alpha: .15),
+                            foregroundColor: _accent,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: _accent.withValues(alpha: .35), width: 1.2),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Enregistrer',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              letterSpacing: -0.2,
+                            ),
                           ),
                         ),
                       ),
@@ -341,16 +371,17 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
       padding: const EdgeInsets.fromLTRB(20, 80, 20, 120),
       children: [
         // ── Meta row ──
-        Row(
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            if (_isPinned) ...[
+            if (_isPinned)
               _MetaPill(
                 icon: Icons.push_pin_rounded,
                 label: 'Épinglée',
                 color: AppColors.yellow,
               ),
-              const SizedBox(width: 8),
-            ],
             if (note.createdAt != null)
               Text(
                 _formatDate(note.updatedAt ?? note.createdAt!),
@@ -360,10 +391,9 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            const Spacer(),
             if (words > 0)
               Text(
-                '$words mots · $readMins min',
+                '·  $words mots  ·  $readMins min',
                 style: const TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 11.5,
