@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 
 import '../../../../app/theme/app_colors.dart';
@@ -49,20 +50,24 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
   Future<void> _togglePublic(StudyPack pack) async {
     setState(() => _isSaving = true);
     try {
+      final newStatus = !pack.isPublic;
       await ref.read(studyPacksRepositoryProvider).update(pack.id, {
-        'isPublic': !pack.isPublic,
+        'isPublic': newStatus,
       });
       ref.invalidate(studyPackProvider(pack.id));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(!pack.isPublic
-                ? '🌍 Pack d\'étude publié avec succès !'
-                : '🔒 Pack d\'étude rendu privé.'),
-            backgroundColor: AppColors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        if (newStatus) {
+          await Clipboard.setData(ClipboardData(text: 'http://localhost:4200/study-hub/shared/${pack.id}'));
+          _showShareDialog(pack.id);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🔒 Pack d\'étude rendu privé.'),
+              backgroundColor: AppColors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -77,6 +82,136 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  void _showShareDialog(String packId) {
+    final shareLink = 'http://localhost:4200/study-hub/shared/$packId';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceGlass,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: AppColors.border),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.green.withValues(alpha: .15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.share_rounded,
+                size: 18,
+                color: AppColors.green,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Partager le Pack',
+                style: GoogleFonts.outfit(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Le pack d\'étude est désormais public. Partagez ce lien avec vos collègues ou étudiants :',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.bg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      shareLink,
+                      style: GoogleFonts.jetBrainsMono(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: shareLink));
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(
+                          content: Text('Lien copié !'),
+                          backgroundColor: AppColors.green,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: .15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.content_copy_rounded,
+                        size: 14,
+                        color: AppColors.accentBright,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Row(
+              children: [
+                Icon(Icons.check_circle_outline_rounded, color: AppColors.green, size: 14),
+                SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Lien copié dans le presse-papiers.',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textPrimary,
+            ),
+            child: const Text('Fermer', style: TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _deleteSelectedItems(StudyPack pack) async {
