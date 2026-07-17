@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../data/study_packs_repository.dart';
 import '../../domain/study_pack.dart';
 
@@ -44,6 +45,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(themeControllerProvider);
     final packsAsync = ref.watch(studyPacksProvider);
     final text = Theme.of(context).textTheme;
 

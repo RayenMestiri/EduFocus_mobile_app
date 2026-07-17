@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../../auth/presentation/auth_controller.dart';
 import '../../data/dashboard_repository.dart';
 import '../../domain/dashboard_stats.dart';
@@ -22,6 +23,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(themeControllerProvider);
     final user = ref.watch(authControllerProvider).value;
     final stats = ref.watch(dashboardStatsProvider);
 

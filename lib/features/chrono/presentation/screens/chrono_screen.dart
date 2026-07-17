@@ -3,17 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 
 /// Chronometer — device-local like the Angular version (no backend).
-class ChronoScreen extends StatefulWidget {
+class ChronoScreen extends ConsumerStatefulWidget {
   const ChronoScreen({super.key});
 
   @override
-  State<ChronoScreen> createState() => _ChronoScreenState();
+  ConsumerState<ChronoScreen> createState() => _ChronoScreenState();
 }
 
-class _ChronoScreenState extends State<ChronoScreen> {
+class _ChronoScreenState extends ConsumerState<ChronoScreen> {
   final _stopwatch = Stopwatch();
   Timer? _ticker;
   final List<Duration> _laps = [];
@@ -62,6 +65,7 @@ class _ChronoScreenState extends State<ChronoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(themeControllerProvider);
     final text = Theme.of(context).textTheme;
     final running = _stopwatch.isRunning;
     final elapsed = _stopwatch.elapsed;

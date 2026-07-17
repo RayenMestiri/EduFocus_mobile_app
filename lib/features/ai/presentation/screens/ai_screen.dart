@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../../dashboard/data/dashboard_repository.dart';
 import '../../data/ai_repository.dart';
 
@@ -42,6 +43,7 @@ class _AiScreenState extends ConsumerState<AiScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(themeControllerProvider);
     final text = Theme.of(context).textTheme;
 
     return Scaffold(

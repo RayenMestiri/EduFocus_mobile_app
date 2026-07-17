@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../../todos/data/todos_repository.dart';
 import '../../../todos/domain/todo.dart';
 import '../../../todos/presentation/widgets/todo_form_sheet.dart';
@@ -23,6 +24,7 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(themeControllerProvider);
     final subjects = ref.watch(subjectsControllerProvider);
     final todos = ref.watch(todosControllerProvider);
 

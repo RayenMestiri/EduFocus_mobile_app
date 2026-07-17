@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../../subjects/data/subjects_repository.dart';
 import '../../../subjects/domain/subject.dart';
 import '../timer_controller.dart';
@@ -16,6 +17,7 @@ class TimerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(themeControllerProvider);
     final timer = ref.watch(pomodoroControllerProvider);
     final subjects = ref.watch(subjectsControllerProvider);
     final isBreak = timer.phase == TimerPhase.shortBreak;

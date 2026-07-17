@@ -3,11 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/theme_controller.dart';
 
 /// App shell: hosts the tab branches behind a floating glass navigation bar
 /// with an animated violet pill indicator.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -21,7 +24,8 @@ class AppShell extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(themeControllerProvider);
     return Scaffold(
       extendBody: true,
       body: navigationShell,
