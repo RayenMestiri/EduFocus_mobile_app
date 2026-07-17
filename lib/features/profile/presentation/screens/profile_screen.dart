@@ -494,6 +494,8 @@ class _SettingSlider extends StatelessWidget {
             inactiveTrackColor: AppColors.surfaceHover,
             overlayColor: color.withValues(alpha: .15),
             trackHeight: 4,
+            tickMarkShape: const _InactiveOnlyTickMarkShape(tickMarkRadius: 1.2),
+            inactiveTickMarkColor: color.withValues(alpha: .24),
           ),
           child: Slider(
             value: value.toDouble(),
@@ -505,6 +507,50 @@ class _SettingSlider extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _InactiveOnlyTickMarkShape extends SliderTickMarkShape {
+  const _InactiveOnlyTickMarkShape({this.tickMarkRadius});
+
+  final double? tickMarkRadius;
+
+  @override
+  Size getPreferredSize({
+    required SliderThemeData sliderTheme,
+    required bool isEnabled,
+  }) {
+    return Size.fromRadius(tickMarkRadius ?? 1.5);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required Offset thumbCenter,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
+    // Determine active zone based on TextDirection
+    final bool isLeftToRight = textDirection == TextDirection.ltr;
+    final bool isActive = isLeftToRight
+        ? center.dx <= thumbCenter.dx
+        : center.dx >= thumbCenter.dx;
+
+    // Do not paint tick marks in the active/filled zone
+    if (isActive) {
+      return;
+    }
+
+    final Canvas canvas = context.canvas;
+    final double radius = tickMarkRadius ?? 1.5;
+    final Paint paint = Paint()
+      ..color = sliderTheme.inactiveTickMarkColor ?? Colors.grey.withValues(alpha: 0.5);
+
+    canvas.drawCircle(center, radius, paint);
   }
 }
 
