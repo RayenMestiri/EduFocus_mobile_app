@@ -35,7 +35,7 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
       } else {
         _stopwatch.start();
         _ticker = Timer.periodic(
-          const Duration(milliseconds: 100),
+          const Duration(milliseconds: 30),
           (_) => setState(() {}),
         );
       }
@@ -60,7 +60,8 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
     final h = d.inHours.toString().padLeft(2, '0');
     final m = (d.inMinutes % 60).toString().padLeft(2, '0');
     final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$h:$m:$s';
+    final cs = ((d.inMilliseconds % 1000) / 10).truncate().toString().padLeft(2, '0');
+    return '$h:$m:$s.$cs';
   }
 
   @override
@@ -176,7 +177,8 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
                     textAlign: TextAlign.center,
                     style: text.displayLarge?.copyWith(
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -2,
+                      fontSize: 44,
+                      letterSpacing: -1.2,
                       fontFeatures: const [FontFeature.tabularFigures()],
                       shadows: [
                         Shadow(

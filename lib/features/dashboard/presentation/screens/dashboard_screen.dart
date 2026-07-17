@@ -1118,22 +1118,23 @@ class _MotivationStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceGlass,
+        color: palette.surfaceGlass,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: palette.border),
       ),
       child: Row(
         children: [
-          Icon(Icons.spa_rounded, color: AppColors.green, size: 18),
+          Icon(Icons.spa_rounded, color: palette.green, size: 18),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               'La régularité bat l\'intensité. Une petite session vaut mieux qu\'aucune.',
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: palette.textSecondary,
                 fontSize: 12,
                 height: 1.4,
                 fontStyle: FontStyle.italic,
