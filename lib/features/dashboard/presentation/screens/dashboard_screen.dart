@@ -611,7 +611,7 @@ class _ActionTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: large ? 104 : 88,
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 11),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -643,7 +643,7 @@ class _ActionTile extends StatelessWidget {
               ),
               child: Icon(icon, color: color, size: 19),
             ),
-            const SizedBox(height: 9),
+            const SizedBox(height: 6),
             Text(
               label,
               maxLines: 1,
