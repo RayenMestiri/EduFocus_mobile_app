@@ -18,12 +18,12 @@ class AuthShell extends StatelessWidget {
       body: Stack(
         children: [
           // Ambient radial glows
-          const Positioned(
+          Positioned(
             top: -140,
             left: -100,
             child: _GlowOrb(color: AppColors.accentDeep, size: 380),
           ),
-          const Positioned(
+          Positioned(
             bottom: -160,
             right: -120,
             child: _GlowOrb(color: AppColors.indigo, size: 420),
@@ -151,16 +151,12 @@ class AuthErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: AppColors.red,
-            size: 18,
-          ),
+          Icon(Icons.error_outline_rounded, color: AppColors.red, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(color: AppColors.red, fontSize: 13),
+              style: TextStyle(color: AppColors.red, fontSize: 13),
             ),
           ),
         ],

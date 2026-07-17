@@ -223,7 +223,10 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
         title: packAsync.when(
           data: (p) => Text(
             p.title,
-            style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
           loading: () => const Text('…'),
@@ -233,11 +236,11 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
       body: packAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text(e.toString(), style: const TextStyle(color: AppColors.red)),
+          child: Text(e.toString(), style: TextStyle(color: AppColors.red)),
         ),
         data: (pack) {
           if (pack.flashcards.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Aucune flashcard dans ce pack.',
                 style: TextStyle(color: AppColors.textMuted),
@@ -284,7 +287,10 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
 
               // ── Progress Bar ──
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -293,7 +299,9 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
                         child: LinearProgressIndicator(
                           value: (_currentIndex + 1) / _reviewQueue.length,
                           minHeight: 5,
-                          color: _studyMode == 'exam' ? AppColors.accent : AppColors.cyan,
+                          color: _studyMode == 'exam'
+                              ? AppColors.accent
+                              : AppColors.cyan,
                           backgroundColor: AppColors.surfaceHover,
                         ),
                       ),
@@ -318,7 +326,10 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
                   itemCount: _reviewQueue.length,
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       child: _FlipCard(
                         key: ValueKey(card.id),
                         card: card,
@@ -332,7 +343,10 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
 
               // ── Navigation & Skip row ──
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -394,10 +408,7 @@ class _FlashcardsScreenState extends ConsumerState<FlashcardsScreen> {
 // ══════════════════════════════════════════════════════════
 
 class _ModeSwitcher extends StatelessWidget {
-  const _ModeSwitcher({
-    required this.currentMode,
-    required this.onModeChanged,
-  });
+  const _ModeSwitcher({required this.currentMode, required this.onModeChanged});
 
   final String currentMode;
   final ValueChanged<String> onModeChanged;
@@ -470,16 +481,14 @@ class _ModeTab extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isActive ? color : AppColors.textMuted,
-            ),
+            Icon(icon, size: 14, color: isActive ? color : AppColors.textMuted),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+                color: isActive
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
                 fontWeight: FontWeight.w800,
                 fontSize: 11,
               ),
@@ -506,8 +515,8 @@ class _ModeBanner extends StatelessWidget {
     final isExam = studyMode == 'exam';
     final label = isExam
         ? (dueCount > 0
-            ? '$dueCount cartes à réviser aujourd\'hui 📚'
-            : 'Pas de cartes à réviser pour le moment ✨')
+              ? '$dueCount cartes à réviser aujourd\'hui 📚'
+              : 'Pas de cartes à réviser pour le moment ✨')
         : 'Navigation libre — sans évaluation SRS';
 
     final color = isExam ? AppColors.accent : AppColors.cyan;
@@ -523,8 +532,11 @@ class _ModeBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(isExam ? Icons.psychology_rounded : Icons.menu_book_rounded,
-              size: 14, color: color),
+          Icon(
+            isExam ? Icons.psychology_rounded : Icons.menu_book_rounded,
+            size: 14,
+            color: color,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -566,16 +578,28 @@ class _SrsScoreboard extends StatelessWidget {
       child: Row(
         children: [
           _SrsScoreCell(
-              count: newCount, label: 'Nouveau', color: AppColors.blue),
+            count: newCount,
+            label: 'Nouveau',
+            color: AppColors.blue,
+          ),
           const SizedBox(width: 8),
           _SrsScoreCell(
-              count: learningCount, label: 'Apprent.', color: AppColors.yellow),
+            count: learningCount,
+            label: 'Apprent.',
+            color: AppColors.yellow,
+          ),
           const SizedBox(width: 8),
           _SrsScoreCell(
-              count: reviewCount, label: 'Révision', color: AppColors.accent),
+            count: reviewCount,
+            label: 'Révision',
+            color: AppColors.accent,
+          ),
           const SizedBox(width: 8),
           _SrsScoreCell(
-              count: masteredCount, label: 'Maîtrisé', color: AppColors.green),
+            count: masteredCount,
+            label: 'Maîtrisé',
+            color: AppColors.green,
+          ),
         ],
       ),
     );
@@ -772,7 +796,10 @@ class _CardFace extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: .12),
                   borderRadius: BorderRadius.circular(8),
@@ -818,7 +845,7 @@ class _CardFace extends StatelessWidget {
                         ),
                         child: Text(
                           code!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'JetBrains Mono',
                             fontSize: 11,
                             color: AppColors.cyan,
@@ -837,8 +864,11 @@ class _CardFace extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.touch_app_rounded,
-                    size: 13, color: AppColors.textMuted.withValues(alpha: .5)),
+                Icon(
+                  Icons.touch_app_rounded,
+                  size: 13,
+                  color: AppColors.textMuted.withValues(alpha: .5),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Retourner la carte',
@@ -931,10 +961,7 @@ class _NavButton extends StatelessWidget {
         icon: Icon(icon, size: 16),
         label: Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-          ),
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -959,14 +986,16 @@ class _FlipIndicator extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isFlipped ? Icons.lightbulb_outline_rounded : Icons.help_outline_rounded,
+            isFlipped
+                ? Icons.lightbulb_outline_rounded
+                : Icons.help_outline_rounded,
             size: 13,
             color: isFlipped ? AppColors.green : AppColors.accentBright,
           ),
           const SizedBox(width: 6),
           Text(
             isFlipped ? 'Afficher la question' : 'Afficher la réponse',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 10,
               fontWeight: FontWeight.w700,
@@ -999,7 +1028,7 @@ class _SrsRatingPanel extends StatelessWidget {
       return Container(
         height: 60,
         alignment: Alignment.center,
-        child: const Text(
+        child: Text(
           'Retournez la carte pour l\'évaluer',
           style: TextStyle(
             color: AppColors.textMuted,
@@ -1012,7 +1041,7 @@ class _SrsRatingPanel extends StatelessWidget {
 
     return Column(
       children: [
-        const Text(
+        Text(
           'PROCHAIN INTERVALLE DE RÉVISION',
           style: TextStyle(
             color: AppColors.textMuted,
@@ -1201,9 +1230,11 @@ class _SessionSummaryScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.green.withValues(alpha: .12),
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.green.withValues(alpha: .3)),
+                  border: Border.all(
+                    color: AppColors.green.withValues(alpha: .3),
+                  ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.verified_rounded,
                   color: AppColors.green,
                   size: 36,
@@ -1228,7 +1259,9 @@ class _SessionSummaryScreen extends StatelessWidget {
               studyMode == 'exam'
                   ? 'Félicitations pour vos révisions espacées.'
                   : 'Parcours libre complété.',
-              style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
 
@@ -1247,20 +1280,22 @@ class _SessionSummaryScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Temps écoulé',
                         style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12),
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                       Text(
                         timeStr,
-                        style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                            fontFamily: 'JetBrains Mono'),
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                          fontFamily: 'JetBrains Mono',
+                        ),
                       ),
                     ],
                   ),
@@ -1268,20 +1303,22 @@ class _SessionSummaryScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Cartes parcourues',
                         style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12),
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                       Text(
                         '$total',
-                        style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                            fontFamily: 'JetBrains Mono'),
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                          fontFamily: 'JetBrains Mono',
+                        ),
                       ),
                     ],
                   ),
@@ -1290,24 +1327,28 @@ class _SessionSummaryScreen extends StatelessWidget {
                     Container(height: 1, color: AppColors.border),
                     const SizedBox(height: 12),
                     _StatRow(
-                        label: 'À revoir (Again)',
-                        count: againCount,
-                        color: AppColors.red),
+                      label: 'À revoir (Again)',
+                      count: againCount,
+                      color: AppColors.red,
+                    ),
                     const SizedBox(height: 8),
                     _StatRow(
-                        label: 'Difficile (Hard)',
-                        count: hardCount,
-                        color: AppColors.yellow),
+                      label: 'Difficile (Hard)',
+                      count: hardCount,
+                      color: AppColors.yellow,
+                    ),
                     const SizedBox(height: 8),
                     _StatRow(
-                        label: 'Bien (Good)',
-                        count: goodCount,
-                        color: AppColors.blue),
+                      label: 'Bien (Good)',
+                      count: goodCount,
+                      color: AppColors.blue,
+                    ),
                     const SizedBox(height: 8),
                     _StatRow(
-                        label: 'Facile (Easy)',
-                        count: easyCount,
-                        color: AppColors.green),
+                      label: 'Facile (Easy)',
+                      count: easyCount,
+                      color: AppColors.green,
+                    ),
                   ],
                 ],
               ),
@@ -1338,7 +1379,7 @@ class _SessionSummaryScreen extends StatelessWidget {
             const SizedBox(height: 10),
             TextButton(
               onPressed: onClose,
-              child: const Text(
+              child: Text(
                 'Retour au pack',
                 style: TextStyle(
                   color: AppColors.textSecondary,
@@ -1379,7 +1420,7 @@ class _StatRow extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

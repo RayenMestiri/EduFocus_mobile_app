@@ -230,9 +230,9 @@ class Note {
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? 'Sans titre',
       content: json['content'] as String? ?? '',
-      tags: (json['tags'] as List? ?? const [])
-          .whereType<String>()
-          .toList(growable: false),
+      tags: (json['tags'] as List? ?? const []).whereType<String>().toList(
+        growable: false,
+      ),
       isPinned: json['isPinned'] as bool? ?? false,
       color: json['color'] as String? ?? '#E0F2FE',
       createdAt: json['createdAt'] != null
@@ -352,10 +352,7 @@ class CheatsheetItem {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'key': key,
-      'value': value,
-    };
+    return {'key': key, 'value': value};
   }
 }
 

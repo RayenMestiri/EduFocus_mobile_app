@@ -92,7 +92,7 @@ class _ChronoScreenState extends State<ChronoScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 15,
                       color: AppColors.textPrimary,
@@ -128,7 +128,10 @@ class _ChronoScreenState extends State<ChronoScreen> {
                 ),
                 // Laps count pill
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceGlass,
                     borderRadius: BorderRadius.circular(10),
@@ -136,7 +139,7 @@ class _ChronoScreenState extends State<ChronoScreen> {
                   ),
                   child: Text(
                     '${_laps.length} tour${_laps.length > 1 ? "s" : ""}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -180,7 +183,7 @@ class _ChronoScreenState extends State<ChronoScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'TEMPS ÉCOULÉ',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -270,7 +273,7 @@ class _ChronoScreenState extends State<ChronoScreen> {
                         ),
                         child: Text(
                           'Tour ${_laps.length - i}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.cyan,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
@@ -290,7 +293,7 @@ class _ChronoScreenState extends State<ChronoScreen> {
                         i == _laps.length - 1
                             ? '+${_format(_laps[i])}'
                             : '+${_format(_laps[i] - _laps[i + 1])}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 12,
                           fontFeatures: [FontFeature.tabularFigures()],
@@ -364,7 +367,7 @@ class _SecondaryAction extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,

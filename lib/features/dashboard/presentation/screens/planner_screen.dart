@@ -69,7 +69,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('📅 Planning enregistré avec succès !'),
             backgroundColor: AppColors.green,
             behavior: SnackBarBehavior.floating,
@@ -104,14 +104,21 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           onAdd: (subjectId, session, priority) {
             setState(() {
               // Find if this subject already exists in the day plan
-              final existingSubjectIndex = _localSubjects.indexWhere((s) => s.subjectId == subjectId);
+              final existingSubjectIndex = _localSubjects.indexWhere(
+                (s) => s.subjectId == subjectId,
+              );
 
               if (existingSubjectIndex != -1) {
                 final existingSubject = _localSubjects[existingSubjectIndex];
-                final updatedSessions = List<DayPlanSubjectSession>.from(existingSubject.sessions)..add(session);
-                
+                final updatedSessions = List<DayPlanSubjectSession>.from(
+                  existingSubject.sessions,
+                )..add(session);
+
                 // Sum goal minutes from all sessions
-                final newGoalMinutes = updatedSessions.fold(0, (sum, s) => sum + s.duration);
+                final newGoalMinutes = updatedSessions.fold(
+                  0,
+                  (sum, s) => sum + s.duration,
+                );
 
                 _localSubjects[existingSubjectIndex] = DayPlanSubject(
                   subjectId: existingSubject.subjectId,
@@ -125,17 +132,21 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 );
               } else {
                 // Find subject meta
-                final subMeta = allSubjects.firstWhere((sub) => sub.id == subjectId);
-                _localSubjects.add(DayPlanSubject(
-                  subjectId: subjectId,
-                  subjectName: subMeta.name,
-                  subjectColor: subMeta.colorHex,
-                  subjectIcon: subMeta.icon,
-                  goalMinutes: session.duration,
-                  studiedMinutes: 0,
-                  priority: priority,
-                  sessions: [session],
-                ));
+                final subMeta = allSubjects.firstWhere(
+                  (sub) => sub.id == subjectId,
+                );
+                _localSubjects.add(
+                  DayPlanSubject(
+                    subjectId: subjectId,
+                    subjectName: subMeta.name,
+                    subjectColor: subMeta.colorHex,
+                    subjectIcon: subMeta.icon,
+                    goalMinutes: session.duration,
+                    studiedMinutes: 0,
+                    priority: priority,
+                    sessions: [session],
+                  ),
+                );
               }
             });
             _save();
@@ -145,13 +156,22 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     );
   }
 
-  void _toggleSessionCompleted(DayPlanSubject subject, DayPlanSubjectSession session) {
+  void _toggleSessionCompleted(
+    DayPlanSubject subject,
+    DayPlanSubjectSession session,
+  ) {
     setState(() {
-      final subIdx = _localSubjects.indexWhere((s) => s.subjectId == subject.subjectId);
+      final subIdx = _localSubjects.indexWhere(
+        (s) => s.subjectId == subject.subjectId,
+      );
       if (subIdx == -1) return;
 
       final sub = _localSubjects[subIdx];
-      final sesIdx = sub.sessions.indexWhere((s) => s.id == session.id || (s.startTime == session.startTime && s.endTime == session.endTime));
+      final sesIdx = sub.sessions.indexWhere(
+        (s) =>
+            s.id == session.id ||
+            (s.startTime == session.startTime && s.endTime == session.endTime),
+      );
       if (sesIdx == -1) return;
 
       final originalSession = sub.sessions[sesIdx];
@@ -164,10 +184,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
         note: originalSession.note,
       );
 
-      final updatedSessions = List<DayPlanSubjectSession>.from(sub.sessions)..[sesIdx] = toggledSession;
+      final updatedSessions = List<DayPlanSubjectSession>.from(sub.sessions)
+        ..[sesIdx] = toggledSession;
 
       // Recalculate studied minutes locally
-      final newStudiedMinutes = updatedSessions.fold(0, (sum, s) => sum + (s.completed ? s.duration : 0));
+      final newStudiedMinutes = updatedSessions.fold(
+        0,
+        (sum, s) => sum + (s.completed ? s.duration : 0),
+      );
 
       _localSubjects[subIdx] = DayPlanSubject(
         subjectId: sub.subjectId,
@@ -185,18 +209,31 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
 
   void _deleteSession(DayPlanSubject subject, DayPlanSubjectSession session) {
     setState(() {
-      final subIdx = _localSubjects.indexWhere((s) => s.subjectId == subject.subjectId);
+      final subIdx = _localSubjects.indexWhere(
+        (s) => s.subjectId == subject.subjectId,
+      );
       if (subIdx == -1) return;
 
       final sub = _localSubjects[subIdx];
       final updatedSessions = List<DayPlanSubjectSession>.from(sub.sessions)
-        ..removeWhere((s) => s.id == session.id || (s.startTime == session.startTime && s.endTime == session.endTime));
+        ..removeWhere(
+          (s) =>
+              s.id == session.id ||
+              (s.startTime == session.startTime &&
+                  s.endTime == session.endTime),
+        );
 
       if (updatedSessions.isEmpty) {
         _localSubjects.removeAt(subIdx);
       } else {
-        final newGoalMinutes = updatedSessions.fold(0, (sum, s) => sum + s.duration);
-        final newStudiedMinutes = updatedSessions.fold(0, (sum, s) => sum + (s.completed ? s.duration : 0));
+        final newGoalMinutes = updatedSessions.fold(
+          0,
+          (sum, s) => sum + s.duration,
+        );
+        final newStudiedMinutes = updatedSessions.fold(
+          0,
+          (sum, s) => sum + (s.completed ? s.duration : 0),
+        );
 
         _localSubjects[subIdx] = DayPlanSubject(
           subjectId: sub.subjectId,
@@ -268,34 +305,56 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 formatButtonDecoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: .15),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.accent.withValues(alpha: .25)),
+                  border: Border.all(
+                    color: AppColors.accent.withValues(alpha: .25),
+                  ),
                 ),
-                formatButtonTextStyle: const TextStyle(
+                formatButtonTextStyle: TextStyle(
                   color: AppColors.accentText,
                   fontWeight: FontWeight.w800,
                   fontSize: 10,
                 ),
-                titleTextStyle: const TextStyle(
+                titleTextStyle: TextStyle(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
                 ),
-                leftChevronIcon: const Icon(Icons.chevron_left_rounded, color: AppColors.textSecondary),
-                rightChevronIcon: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                leftChevronIcon: Icon(
+                  Icons.chevron_left_rounded,
+                  color: AppColors.textSecondary,
+                ),
+                rightChevronIcon: Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary,
+                ),
               ),
-              daysOfWeekStyle: const DaysOfWeekStyle(
-                weekdayStyle: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold, fontSize: 11),
-                weekendStyle: TextStyle(color: AppColors.red, fontWeight: FontWeight.bold, fontSize: 11),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
+                weekendStyle: TextStyle(
+                  color: AppColors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
               ),
               calendarStyle: CalendarStyle(
-                todayTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+                todayTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                ),
                 todayDecoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: .35),
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.accent, width: 1.5),
                 ),
-                selectedTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-                selectedDecoration: const BoxDecoration(
+                selectedTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                ),
+                selectedDecoration: BoxDecoration(
                   color: AppColors.accent,
                   shape: BoxShape.circle,
                   boxShadow: [
@@ -306,8 +365,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                     ),
                   ],
                 ),
-                defaultTextStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-                weekendTextStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                defaultTextStyle: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+                weekendTextStyle: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
                 outsideDaysVisible: false,
               ),
             ),
@@ -318,10 +383,13 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                const Icon(Icons.today_rounded, size: 14, color: AppColors.textMuted),
+                Icon(Icons.today_rounded, size: 14, color: AppColors.textMuted),
                 const SizedBox(width: 6),
                 Text(
-                  DateFormat('EEEE d MMMM yyyy', 'fr_FR').format(_selectedDay).toUpperCase(),
+                  DateFormat(
+                    'EEEE d MMMM yyyy',
+                    'fr_FR',
+                  ).format(_selectedDay).toUpperCase(),
                   style: textTheme.bodySmall?.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w900,
@@ -338,19 +406,25 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             child: planAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(
-                child: Text(err.toString(), style: const TextStyle(color: AppColors.red)),
+                child: Text(
+                  err.toString(),
+                  style: TextStyle(color: AppColors.red),
+                ),
               ),
               data: (plan) {
                 _initializeLocalStates(plan);
 
                 // Flatten all sessions across subjects and sort by start time
-                final List<MapEntry<DayPlanSubject, DayPlanSubjectSession>> allSessions = [];
+                final List<MapEntry<DayPlanSubject, DayPlanSubjectSession>>
+                allSessions = [];
                 for (final subject in _localSubjects) {
                   for (final session in subject.sessions) {
                     allSessions.add(MapEntry(subject, session));
                   }
                 }
-                allSessions.sort((a, b) => a.value.startTime.compareTo(b.value.startTime));
+                allSessions.sort(
+                  (a, b) => a.value.startTime.compareTo(b.value.startTime),
+                );
 
                 return Column(
                   children: [
@@ -358,8 +432,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: _ProgressCard(
-                        goal: _localSubjects.fold(0, (sum, s) => sum + s.goalMinutes),
-                        studied: _localSubjects.fold(0, (sum, s) => sum + s.studiedMinutes),
+                        goal: _localSubjects.fold(
+                          0,
+                          (sum, s) => sum + s.goalMinutes,
+                        ),
+                        studied: _localSubjects.fold(
+                          0,
+                          (sum, s) => sum + s.studiedMinutes,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -370,26 +450,43 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Sessions de la Journée',
-                                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: AppColors.textPrimary),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
                               Text(
                                 'Planification heure par heure',
-                                style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.textMuted,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
                           subjectsAsync.when(
                             data: (allSubs) => TextButton.icon(
-                              onPressed: () => _showAddSessionBottomSheet(allSubs),
-                              icon: const Icon(Icons.add_alarm_rounded, size: 16, color: AppColors.accentText),
-                              label: const Text(
+                              onPressed: () =>
+                                  _showAddSessionBottomSheet(allSubs),
+                              icon: Icon(
+                                Icons.add_alarm_rounded,
+                                size: 16,
+                                color: AppColors.accentText,
+                              ),
+                              label: Text(
                                 'Ajouter une heure',
-                                style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.accentText, fontSize: 11),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.accentText,
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
                             loading: () => const SizedBox.shrink(),
@@ -410,25 +507,38 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(color: AppColors.border),
                               ),
-                              child: const Column(
+                              child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.alarm_on_rounded, color: AppColors.textMuted, size: 36),
+                                  Icon(
+                                    Icons.alarm_on_rounded,
+                                    color: AppColors.textMuted,
+                                    size: 36,
+                                  ),
                                   SizedBox(height: 12),
                                   Text(
                                     'Aucune session planifiée pour aujourd\'hui.',
-                                    style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      color: AppColors.textMuted,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   SizedBox(height: 4),
                                   Text(
                                     'Cliquez sur "Ajouter une heure" pour planifier votre étude.',
-                                    style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+                                    style: TextStyle(
+                                      color: AppColors.textMuted,
+                                      fontSize: 10,
+                                    ),
                                   ),
                                 ],
                               ),
                             )
                           : ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               itemCount: allSessions.length,
                               itemBuilder: (context, index) {
                                 final entry = allSessions[index];
@@ -438,8 +548,10 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                                 return _SessionTimelineTile(
                                   subject: subject,
                                   session: session,
-                                  onToggle: () => _toggleSessionCompleted(subject, session),
-                                  onDelete: () => _deleteSession(subject, session),
+                                  onToggle: () =>
+                                      _toggleSessionCompleted(subject, session),
+                                  onDelete: () =>
+                                      _deleteSession(subject, session),
                                 );
                               },
                             ),
@@ -517,7 +629,11 @@ class _SessionTimelineTile extends StatelessWidget {
                     fontFamily: 'JetBrains Mono',
                   ),
                 ),
-                const Icon(Icons.arrow_downward_rounded, size: 10, color: AppColors.textMuted),
+                Icon(
+                  Icons.arrow_downward_rounded,
+                  size: 10,
+                  color: AppColors.textMuted,
+                ),
                 Text(
                   session.endTime,
                   style: textTheme.titleSmall?.copyWith(
@@ -551,17 +667,23 @@ class _SessionTimelineTile extends StatelessWidget {
                     subject.subjectName,
                     style: textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      decoration: session.completed ? TextDecoration.lineThrough : null,
+                      decoration: session.completed
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Row(
                     children: [
-                      const Icon(Icons.schedule_rounded, size: 11, color: AppColors.textMuted),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 11,
+                        color: AppColors.textMuted,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${session.duration} min',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
@@ -571,14 +693,21 @@ class _SessionTimelineTile extends StatelessWidget {
                       if (subject.priority == 'high') ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 1.5,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.red.withValues(alpha: .1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             'HAUTE',
-                            style: TextStyle(color: AppColors.red, fontSize: 6.5, fontWeight: FontWeight.w900),
+                            style: TextStyle(
+                              color: AppColors.red,
+                              fontSize: 6.5,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
                       ],
@@ -595,7 +724,9 @@ class _SessionTimelineTile extends StatelessWidget {
                 session.completed
                     ? Icons.check_circle_rounded
                     : Icons.radio_button_unchecked_rounded,
-                color: session.completed ? AppColors.green : AppColors.textMuted,
+                color: session.completed
+                    ? AppColors.green
+                    : AppColors.textMuted,
                 size: 24,
               ),
             ),
@@ -603,7 +734,11 @@ class _SessionTimelineTile extends StatelessWidget {
             // Delete button
             IconButton(
               onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline_rounded, color: AppColors.red, size: 20),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.red,
+                size: 20,
+              ),
             ),
           ],
         ),
@@ -683,7 +818,10 @@ class _ProgressCard extends StatelessWidget {
             children: [
               _HeroStatItem(val: '${goalHours}h', label: 'Planifié'),
               _HeroStatItem(val: '${studiedHours}h', label: 'Complété'),
-              _HeroStatItem(val: '${(progress * 100).round()}%', label: 'Progrès'),
+              _HeroStatItem(
+                val: '${(progress * 100).round()}%',
+                label: 'Progrès',
+              ),
             ],
           ),
         ],
@@ -735,7 +873,12 @@ class _AddSessionBottomSheet extends StatefulWidget {
   });
 
   final List<Subject> availableSubjects;
-  final void Function(String subjectId, DayPlanSubjectSession session, String priority) onAdd;
+  final void Function(
+    String subjectId,
+    DayPlanSubjectSession session,
+    String priority,
+  )
+  onAdd;
 
   @override
   State<_AddSessionBottomSheet> createState() => _AddSessionBottomSheetState();
@@ -794,12 +937,17 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
     final duration = _calculatedDuration;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surfaceGlass,
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -808,18 +956,31 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
             child: Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
           const SizedBox(height: 18),
           Text(
             'Planifier une Session',
-            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -0.4),
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.4,
+            ),
           ),
           const SizedBox(height: 18),
 
           // ── Subject Selector (Horizontal list cards) ──
-          const Text('Matière', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(
+            'Matière',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
           SizedBox(
             height: 52,
@@ -832,10 +993,14 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
 
                 final subHex = sub.colorHex.replaceFirst('#', '');
                 final subVal = int.tryParse(
-                  subHex.length == 3 ? subHex.split('').map((c) => '$c$c').join() : subHex,
+                  subHex.length == 3
+                      ? subHex.split('').map((c) => '$c$c').join()
+                      : subHex,
                   radix: 16,
                 );
-                final listColor = subVal == null ? AppColors.accent : Color(0xFF000000 | subVal);
+                final listColor = subVal == null
+                    ? AppColors.accent
+                    : Color(0xFF000000 | subVal);
 
                 return GestureDetector(
                   onTap: () => setState(() => _selectedSubject = sub),
@@ -844,14 +1009,23 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
                     margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: active ? listColor.withValues(alpha: .15) : AppColors.surfaceSecondary,
+                      color: active
+                          ? listColor.withValues(alpha: .15)
+                          : AppColors.surfaceSecondary,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: active ? listColor : AppColors.border, width: 1.5),
+                      border: Border.all(
+                        color: active ? listColor : AppColors.border,
+                        width: 1.5,
+                      ),
                     ),
                     alignment: Alignment.center,
                     child: Row(
                       children: [
-                        Icon(Icons.menu_book_rounded, color: active ? listColor : AppColors.textMuted, size: 14),
+                        Icon(
+                          Icons.menu_book_rounded,
+                          color: active ? listColor : AppColors.textMuted,
+                          size: 14,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           sub.name,
@@ -872,7 +1046,14 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
           const SizedBox(height: 18),
 
           // ── Start Time & End Time Picker Buttons ──
-          const Text('Horaires', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(
+            'Horaires',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -899,7 +1080,10 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
           if (duration > 0)
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: subColor.withValues(alpha: .1),
                   borderRadius: BorderRadius.circular(8),
@@ -907,22 +1091,37 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
                 ),
                 child: Text(
                   'Durée calculée : ${duration ~/ 60 > 0 ? "${duration ~/ 60}h " : ""}${duration % 60} min',
-                  style: TextStyle(color: subColor, fontWeight: FontWeight.w800, fontSize: 11),
+                  style: TextStyle(
+                    color: subColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                  ),
                 ),
               ),
             )
           else
-            const Center(
+            Center(
               child: Text(
                 'L\'heure de fin doit être après l\'heure de début',
-                style: TextStyle(color: AppColors.red, fontSize: 10, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.red,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 
           const SizedBox(height: 18),
 
           // ── Priority Selector ──
-          const Text('Priorité', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(
+            'Priorité',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -942,8 +1141,16 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
               Expanded(
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
-                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Annuler', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    'Annuler',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -967,9 +1174,17 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text('Ajouter à l\'Agenda', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Ajouter à l\'Agenda',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -988,9 +1203,14 @@ class _AddSessionBottomSheetState extends State<_AddSessionBottomSheet> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: active ? color.withValues(alpha: .15) : AppColors.surfaceSecondary,
+            color: active
+                ? color.withValues(alpha: .15)
+                : AppColors.surfaceSecondary,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: active ? color : AppColors.border, width: 1.5),
+            border: Border.all(
+              color: active ? color : AppColors.border,
+              width: 1.5,
+            ),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -1037,12 +1257,16 @@ class _TimePickerButton extends StatelessWidget {
               children: [
                 Text(
                   label.toUpperCase(),
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 8, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   time,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
@@ -1051,7 +1275,11 @@ class _TimePickerButton extends StatelessWidget {
                 ),
               ],
             ),
-            const Icon(Icons.access_time_filled_rounded, color: AppColors.textMuted, size: 18),
+            Icon(
+              Icons.access_time_filled_rounded,
+              color: AppColors.textMuted,
+              size: 18,
+            ),
           ],
         ),
       ),

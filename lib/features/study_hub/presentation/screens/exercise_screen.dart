@@ -39,11 +39,10 @@ class ExerciseScreen extends ConsumerWidget {
       body: pack.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text(e.toString(),
-              style: const TextStyle(color: AppColors.red)),
+          child: Text(e.toString(), style: TextStyle(color: AppColors.red)),
         ),
         data: (p) => p.exercises.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text(
                   'Aucun exercice dans ce pack.',
                   style: TextStyle(color: AppColors.textMuted),
@@ -118,7 +117,7 @@ class _ExerciseBodyState extends State<_ExerciseBody> {
               const SizedBox(width: 12),
               Text(
                 '${_currentIndex + 1}/$total',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textMuted,
                   fontWeight: FontWeight.w800,
                   fontSize: 12,
@@ -144,8 +143,7 @@ class _ExerciseBodyState extends State<_ExerciseBody> {
                 total: total,
                 revealed: revealed,
                 onReveal: () => setState(() => _revealedSolutions.add(index)),
-                onPrevious:
-                    index > 0 ? () => _goTo(index - 1) : null,
+                onPrevious: index > 0 ? () => _goTo(index - 1) : null,
                 onNext: index < total - 1 ? () => _goTo(index + 1) : null,
               );
             },
@@ -256,7 +254,7 @@ class _ExercisePage extends StatelessWidget {
               ),
               child: Text(
                 exercise.schemaContext!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'JetBrains Mono',
                   fontSize: 11,
                   color: AppColors.cyan,
@@ -322,11 +320,12 @@ class _ExercisePage extends StatelessWidget {
                 color: AppColors.bg,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: AppColors.green.withValues(alpha: .2)),
+                  color: AppColors.green.withValues(alpha: .2),
+                ),
               ),
               child: Text(
                 exercise.correctSolution,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'JetBrains Mono',
                   fontSize: 12,
                   color: AppColors.green,
@@ -344,13 +343,17 @@ class _ExercisePage extends StatelessWidget {
                 color: AppColors.yellow.withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: AppColors.yellow.withValues(alpha: .2)),
+                  color: AppColors.yellow.withValues(alpha: .2),
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.lightbulb_rounded,
-                      color: AppColors.yellow, size: 16),
+                  Icon(
+                    Icons.lightbulb_rounded,
+                    color: AppColors.yellow,
+                    size: 16,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -388,13 +391,11 @@ class _ExercisePage extends StatelessWidget {
                   icon: const Icon(Icons.arrow_back_rounded, size: 18),
                   label: const Text(
                     'Précédent',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                   ),
                 ),
               ),
-            if (onPrevious != null && onNext != null)
-              const SizedBox(width: 12),
+            if (onPrevious != null && onNext != null) const SizedBox(width: 12),
             if (onNext != null)
               Expanded(
                 child: ElevatedButton.icon(
@@ -410,8 +411,7 @@ class _ExercisePage extends StatelessWidget {
                   icon: const Icon(Icons.arrow_forward_rounded, size: 18),
                   label: const Text(
                     'Suivant',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                   ),
                 ),
               ),

@@ -30,7 +30,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
             await ref.read(studyPacksRepositoryProvider).clone(cleanId);
             ref.invalidate(studyPacksProvider);
             messenger.showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text('📥 Pack d\'étude importé avec succès !'),
                 backgroundColor: AppColors.green,
                 behavior: SnackBarBehavior.floating,
@@ -59,7 +59,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
               padding: const EdgeInsets.all(32),
               children: [
                 const SizedBox(height: 60),
-                const Icon(
+                Icon(
                   Icons.error_outline_rounded,
                   color: AppColors.red,
                   size: 48,
@@ -68,7 +68,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                 Text(
                   'Impossible de charger les packs d\'étude : $e',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.red,
                     fontWeight: FontWeight.bold,
                   ),
@@ -110,7 +110,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                             shape: BoxShape.circle,
                             border: Border.all(color: AppColors.border),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_ios_new_rounded,
                             size: 15,
                             color: AppColors.textPrimary,
@@ -157,7 +157,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                         ),
                         child: Text(
                           "${list.length} pack${list.length > 1 ? 's' : ''}",
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
@@ -184,7 +184,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                         color: AppColors.accent.withValues(alpha: .15),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Text('🧠', style: TextStyle(fontSize: 16)),
                         SizedBox(width: 10),
@@ -207,7 +207,10 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                   GestureDetector(
                     onTap: () => _showImportBottomSheet(context),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceGlass,
                         borderRadius: BorderRadius.circular(16),
@@ -231,7 +234,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                               color: AppColors.accent.withValues(alpha: .14),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.download_rounded,
                               color: AppColors.accentBright,
                               size: 18,
@@ -251,7 +254,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 3),
-                                const Text(
+                                Text(
                                   'Saisissez un code de partage mobile pour cloner un pack public.',
                                   style: TextStyle(
                                     color: AppColors.textSecondary,
@@ -261,7 +264,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                               ],
                             ),
                           ),
-                          const Icon(
+                          Icon(
                             Icons.chevron_right_rounded,
                             color: AppColors.textMuted,
                             size: 20,
@@ -339,7 +342,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                         ),
                         child: Text(
                           '${filteredList.length}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 10,
                             fontWeight: FontWeight.w900,
@@ -363,7 +366,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                       ),
                       child: Column(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.folder_open_rounded,
                             size: 40,
                             color: AppColors.textMuted,
@@ -632,7 +635,7 @@ class _PackCard extends StatelessWidget {
                             ),
                             child: Text(
                               pack.subject.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 7.5,
                                 fontWeight: FontWeight.w900,
@@ -672,7 +675,7 @@ class _PackCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               '$due dues',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.red,
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w900,
@@ -719,7 +722,7 @@ class _PackCard extends StatelessWidget {
                 // Mastery progress bar (if flashcards exist)
                 if (pack.cardCount > 0) ...[
                   const SizedBox(height: 16),
-                  const Divider(color: AppColors.border, height: 1),
+                  Divider(color: AppColors.border, height: 1),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -730,7 +733,7 @@ class _PackCard extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
+                                Text(
                                   'Progression de maîtrise',
                                   style: TextStyle(
                                     color: AppColors.textMuted,
@@ -740,7 +743,7 @@ class _PackCard extends StatelessWidget {
                                 ),
                                 Text(
                                   '${(progress * 100).round()}%',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.green,
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w900,
@@ -770,7 +773,7 @@ class _PackCard extends StatelessWidget {
                           color: AppColors.surfaceHover,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.chevron_right_rounded,
                           color: AppColors.textSecondary,
                           size: 16,
@@ -889,7 +892,7 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
       ),
       child: Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.surfaceSecondary,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(top: BorderSide(color: AppColors.border, width: 1.5)),
@@ -918,7 +921,7 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
                     color: AppColors.accent.withValues(alpha: .15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.download_rounded,
                     color: AppColors.accentBright,
                     size: 18,
@@ -936,7 +939,7 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Entrez le code de partage mobile (ex: EDU-60F8BA5A...) pour cloner ce pack d\'étude public dans votre espace personnel.',
               style: TextStyle(
                 color: AppColors.textSecondary,
@@ -962,13 +965,16 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
                 fillColor: AppColors.bg,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+                  borderSide: BorderSide(color: AppColors.accent, width: 1.5),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
               textCapitalization: TextCapitalization.characters,
             ),
@@ -976,7 +982,11 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
               const SizedBox(height: 8),
               Text(
                 _error!,
-                style: const TextStyle(color: AppColors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
             const SizedBox(height: 24),
@@ -987,13 +997,16 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
                     onPressed: _loading ? null : () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textSecondary,
-                      side: const BorderSide(color: AppColors.border),
+                      side: BorderSide(color: AppColors.border),
                       minimumSize: const Size(0, 48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: const Text('Annuler', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text(
+                      'Annuler',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1016,7 +1029,10 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Importer', style: TextStyle(fontWeight: FontWeight.w800)),
+                        : const Text(
+                            'Importer',
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
                   ),
                 ),
               ],

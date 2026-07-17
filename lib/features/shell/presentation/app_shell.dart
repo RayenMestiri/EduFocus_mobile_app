@@ -27,32 +27,46 @@ class AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(26),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-            child: Container(
-              height: 68,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceGlass,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: AppColors.border),
+        child: DecoratedBox(
+          // Shadow lives outside the clip so the floating bar reads as
+          // elevated on both the dark and porcelain canvases.
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 24,
+                offset: const Offset(0, 10),
               ),
-              child: Row(
-                children: [
-                  for (var i = 0; i < _tabs.length; i++)
-                    Expanded(
-                      child: _NavItem(
-                        icon: _tabs[i].$1,
-                        label: _tabs[i].$2,
-                        selected: navigationShell.currentIndex == i,
-                        onTap: () => navigationShell.goBranch(
-                          i,
-                          initialLocation: i == navigationShell.currentIndex,
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: Container(
+                height: 68,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceGlass,
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < _tabs.length; i++)
+                      Expanded(
+                        child: _NavItem(
+                          icon: _tabs[i].$1,
+                          label: _tabs[i].$2,
+                          selected: navigationShell.currentIndex == i,
+                          onTap: () => navigationShell.goBranch(
+                            i,
+                            initialLocation: i == navigationShell.currentIndex,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

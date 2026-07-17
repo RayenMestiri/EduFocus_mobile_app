@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../../auth/presentation/auth_controller.dart';
 import '../../../dashboard/domain/dashboard_stats.dart';
 import '../../data/settings_repository.dart';
@@ -191,6 +192,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 28),
           ],
 
+          // ── Appearance ──
+          Text(
+            'Apparence',
+            style: text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const _ThemeModeSelector(),
+          const SizedBox(height: 28),
+
           // ── Timer settings ──
           Text(
             'Réglages du timer',
@@ -205,10 +218,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: EdgeInsets.all(24),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => Text(
-              e.toString(),
-              style: const TextStyle(color: AppColors.red),
-            ),
+            error: (e, _) =>
+                Text(e.toString(), style: TextStyle(color: AppColors.red)),
             data: (_) {
               final draft = _draft;
               if (draft == null) return const SizedBox.shrink();
@@ -225,99 +236,126 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   type: MaterialType.transparency,
                   child: Column(
                     children: [
-                    _SettingSlider(
-                      icon: Icons.psychology_rounded,
-                      label: 'Durée de focus',
-                      value: draft.pomodoroLength,
-                      min: 5,
-                      max: 60,
-                      unit: 'min',
-                      color: AppColors.accentBright,
-                      onChanged: (v) => setState(
-                        () => _draft = draft.copyWith(pomodoroLength: v),
-                      ),
-                    ),
-                    _SettingSlider(
-                      icon: Icons.coffee_rounded,
-                      label: 'Pause courte',
-                      value: draft.shortBreak,
-                      min: 1,
-                      max: 15,
-                      unit: 'min',
-                      color: AppColors.green,
-                      onChanged: (v) => setState(
-                        () => _draft = draft.copyWith(shortBreak: v),
-                      ),
-                    ),
-                    _SettingSlider(
-                      icon: Icons.self_improvement_rounded,
-                      label: 'Pause longue',
-                      value: draft.longBreak,
-                      min: 5,
-                      max: 30,
-                      unit: 'min',
-                      color: AppColors.cyan,
-                      onChanged: (v) =>
-                          setState(() => _draft = draft.copyWith(longBreak: v)),
-                    ),
-                    _SettingSlider(
-                      icon: Icons.flag_rounded,
-                      label: 'Objectif sessions / jour',
-                      value: draft.dailySessionsGoal,
-                      min: 1,
-                      max: 30,
-                      unit: '',
-                      color: AppColors.yellow,
-                      onChanged: (v) => setState(
-                        () => _draft = draft.copyWith(dailySessionsGoal: v),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Démarrer les pauses automatiquement',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                      _SettingSlider(
+                        icon: Icons.psychology_rounded,
+                        label: 'Durée de focus',
+                        value: draft.pomodoroLength,
+                        min: 5,
+                        max: 60,
+                        unit: 'min',
+                        color: AppColors.accentBright,
+                        onChanged: (v) => setState(
+                          () => _draft = draft.copyWith(pomodoroLength: v),
                         ),
                       ),
-                      value: draft.autoStartBreaks,
-                      activeThumbColor: AppColors.accent,
-                      onChanged: (v) => setState(
-                        () => _draft = draft.copyWith(autoStartBreaks: v),
-                      ),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Reprendre le focus automatiquement',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                      _SettingSlider(
+                        icon: Icons.coffee_rounded,
+                        label: 'Pause courte',
+                        value: draft.shortBreak,
+                        min: 1,
+                        max: 15,
+                        unit: 'min',
+                        color: AppColors.green,
+                        onChanged: (v) => setState(
+                          () => _draft = draft.copyWith(shortBreak: v),
                         ),
                       ),
-                      value: draft.autoStartFocus,
-                      activeThumbColor: AppColors.accent,
-                      onChanged: (v) => setState(
-                        () => _draft = draft.copyWith(autoStartFocus: v),
+                      _SettingSlider(
+                        icon: Icons.self_improvement_rounded,
+                        label: 'Pause longue',
+                        value: draft.longBreak,
+                        min: 5,
+                        max: 30,
+                        unit: 'min',
+                        color: AppColors.cyan,
+                        onChanged: (v) => setState(
+                          () => _draft = draft.copyWith(longBreak: v),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    FilledButton(
-                      onPressed: _saving ? null : _save,
-                      child: _saving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Enregistrer les réglages'),
-                    ),
-                  ],
+                      _SettingSlider(
+                        icon: Icons.flag_rounded,
+                        label: 'Objectif sessions / jour',
+                        value: draft.dailySessionsGoal,
+                        min: 1,
+                        max: 30,
+                        unit: '',
+                        color: AppColors.yellow,
+                        onChanged: (v) => setState(
+                          () => _draft = draft.copyWith(dailySessionsGoal: v),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          'Démarrer les pauses automatiquement',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        value: draft.autoStartBreaks,
+                        onChanged: (v) => setState(
+                          () => _draft = draft.copyWith(autoStartBreaks: v),
+                        ),
+                      ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          'Reprendre le focus automatiquement',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        value: draft.autoStartFocus,
+                        onChanged: (v) => setState(
+                          () => _draft = draft.copyWith(autoStartFocus: v),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: AppColors.heroGradient,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accent.withValues(alpha: .24),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _saving ? null : _save,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            minimumSize: const Size.fromHeight(52),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: _saving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Enregistrer les réglages',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -330,7 +368,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.red,
-              side: BorderSide(color: AppColors.red.withValues(alpha: .4)),
+              backgroundColor: AppColors.red.withValues(alpha: .06),
+              side: BorderSide(
+                color: AppColors.red.withValues(
+                  alpha: AppColors.isLight ? .22 : .4,
+                ),
+              ),
               minimumSize: const Size.fromHeight(52),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -461,6 +504,176 @@ class _SettingSlider extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THEME MODE SELECTOR — animated 3-way segmented control
+// ═══════════════════════════════════════════════════════════════
+
+class _ThemeModeSelector extends ConsumerWidget {
+  const _ThemeModeSelector();
+
+  static const _options = [
+    (ThemeMode.light, Icons.light_mode_rounded, 'Clair'),
+    (ThemeMode.dark, Icons.dark_mode_rounded, 'Sombre'),
+    (ThemeMode.system, Icons.brightness_auto_rounded, 'Système'),
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeControllerProvider);
+    final index = _options.indexWhere((o) => o.$1 == mode).clamp(0, 2);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceGlass,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  gradient: AppColors.heroGradient,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.palette_rounded,
+                  color: Colors.white,
+                  size: 17,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Thème de l\'interface',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      mode == ThemeMode.system
+                          ? 'Suit le réglage de votre appareil'
+                          : mode == ThemeMode.light
+                          ? 'Toujours lumineux'
+                          : 'Toujours sombre',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 52,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceSecondary,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final w = constraints.maxWidth / _options.length;
+                return Stack(
+                  children: [
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 260),
+                      curve: Curves.easeOutCubic,
+                      left: index * w,
+                      width: w,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: AppColors.heroGradient,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accent.withValues(alpha: .38),
+                              blurRadius: 12,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: Row(
+                        children: [
+                          for (final (m, icon, label) in _options)
+                            Expanded(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => ref
+                                    .read(themeControllerProvider.notifier)
+                                    .setMode(m),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      icon,
+                                      size: 15,
+                                      color: mode == m
+                                          ? Colors.white
+                                          : AppColors.textMuted,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: mode == m
+                                              ? Colors.white
+                                              : AppColors.textMuted,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 11.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

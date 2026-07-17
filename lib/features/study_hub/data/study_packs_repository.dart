@@ -34,7 +34,9 @@ class StudyPacksRepository {
 
   Future<StudyPack> clone(String id) async {
     try {
-      final response = await _dio.post<Map<String, dynamic>>('/study-packs/clone/$id');
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/study-packs/clone/$id',
+      );
       return StudyPack.fromJson(response.data!['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -43,7 +45,10 @@ class StudyPacksRepository {
 
   Future<StudyPack> update(String id, Map<String, dynamic> data) async {
     try {
-      final response = await _dio.put<Map<String, dynamic>>('/study-packs/$id', data: data);
+      final response = await _dio.put<Map<String, dynamic>>(
+        '/study-packs/$id',
+        data: data,
+      );
       return StudyPack.fromJson(response.data!['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

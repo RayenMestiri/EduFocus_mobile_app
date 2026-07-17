@@ -30,7 +30,7 @@ class DashboardScreen extends ConsumerWidget {
       body: Stack(
         children: [
           // ── Ambient light field — the canvas never feels flat/dead ──
-          const Positioned(
+          Positioned(
             top: -110,
             right: -90,
             child: _GlowOrb(
@@ -39,12 +39,12 @@ class DashboardScreen extends ConsumerWidget {
               alpha: .14,
             ),
           ),
-          const Positioned(
+          Positioned(
             bottom: 60,
             left: -130,
             child: _GlowOrb(size: 340, color: AppColors.indigo, alpha: .10),
           ),
-          const Positioned(
+          Positioned(
             top: 280,
             left: -60,
             child: _GlowOrb(size: 200, color: AppColors.cyan, alpha: .06),
@@ -56,7 +56,7 @@ class DashboardScreen extends ConsumerWidget {
             backgroundColor: AppColors.surfaceSecondary,
             color: AppColors.accentBright,
             child: stats.when(
-              loading: () => const Center(
+              loading: () => Center(
                 child: CircularProgressIndicator(color: AppColors.accentBright),
               ),
               error: (error, _) => _ErrorState(
@@ -200,7 +200,7 @@ class _DashboardBody extends StatelessWidget {
                     children: [
                       Text(
                         _dateLabel.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textMuted,
                           fontWeight: FontWeight.w700,
                           fontSize: 11,
@@ -335,7 +335,7 @@ class _DashboardBody extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     'Vos matières',
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
@@ -347,7 +347,7 @@ class _DashboardBody extends StatelessWidget {
                   const Spacer(),
                   _Pressable(
                     onTap: () => context.go(AppRoutes.subjects),
-                    child: const Text(
+                    child: Text(
                       'Tout voir',
                       style: TextStyle(
                         color: AppColors.accentText,
@@ -391,21 +391,33 @@ class _FocusHero extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 22, 18, 22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.borderBright),
+        border: Border.all(
+          color: AppColors.isLight
+              ? AppColors.border.withValues(alpha: 0.8)
+              : AppColors.borderBright,
+        ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.accentDeep.withValues(alpha: .3),
-            AppColors.surfaceGlass,
-            AppColors.indigo.withValues(alpha: .14),
-          ],
+          colors: AppColors.isLight
+              ? [
+                  AppColors.accent.withValues(alpha: .10),
+                  AppColors.surfaceGlass,
+                  AppColors.indigo.withValues(alpha: .06),
+                ]
+              : [
+                  AppColors.accentDeep.withValues(alpha: .3),
+                  AppColors.surfaceGlass,
+                  AppColors.indigo.withValues(alpha: .14),
+                ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accentDeep.withValues(alpha: .22),
-            blurRadius: 36,
-            offset: const Offset(0, 16),
+            color: AppColors.isLight
+                ? AppColors.shadow.withValues(alpha: .06)
+                : AppColors.accentDeep.withValues(alpha: .22),
+            blurRadius: AppColors.isLight ? 20 : 36,
+            offset: AppColors.isLight ? const Offset(0, 8) : const Offset(0, 16),
           ),
         ],
       ),
@@ -444,7 +456,7 @@ class _FocusHero extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         '/ ${today.plannedMinutes.asDuration}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -456,7 +468,7 @@ class _FocusHero extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   statusLine,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12.5,
                     height: 1.3,
@@ -467,7 +479,7 @@ class _FocusHero extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.local_fire_department_rounded,
                         size: 15,
                         color: AppColors.yellow,
@@ -475,7 +487,7 @@ class _FocusHero extends StatelessWidget {
                       const SizedBox(width: 5),
                       Text(
                         '${data.streak} jour${data.streak > 1 ? 's' : ''} de suite',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.yellow,
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -529,7 +541,7 @@ class _RingPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 7
-        ..color = Colors.white.withValues(alpha: .07),
+        ..color = AppColors.surfaceHover,
     );
 
     if (progress <= 0) return;
@@ -557,7 +569,7 @@ class _RingPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 7
         ..strokeCap = StrokeCap.round
-        ..shader = const SweepGradient(
+        ..shader = SweepGradient(
           startAngle: -math.pi / 2,
           endAngle: 3 * math.pi / 2,
           colors: [
@@ -603,14 +615,16 @@ class _ActionTile extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: large ? color.withValues(alpha: .35) : AppColors.border,
+            color: large
+                ? color.withValues(alpha: AppColors.isLight ? .22 : .35)
+                : AppColors.border,
           ),
           gradient: large
               ? LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    color.withValues(alpha: .22),
+                    color.withValues(alpha: AppColors.isLight ? .12 : .22),
                     color.withValues(alpha: .06),
                   ],
                 )
@@ -634,7 +648,7 @@ class _ActionTile extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
@@ -664,12 +678,18 @@ class _StreakCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.yellow.withValues(alpha: .22)),
+        border: Border.all(
+          color: AppColors.yellow.withValues(
+            alpha: AppColors.isLight ? .35 : .22,
+          ),
+        ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.yellow.withValues(alpha: .1),
+            AppColors.yellow.withValues(
+              alpha: AppColors.isLight ? .05 : .1,
+            ),
             AppColors.surfaceGlass,
           ],
         ),
@@ -686,7 +706,7 @@ class _StreakCard extends StatelessWidget {
                   color: AppColors.yellow.withValues(alpha: .18),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.local_fire_department_rounded,
                   color: AppColors.yellow,
                   size: 18,
@@ -707,7 +727,7 @@ class _StreakCard extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 3),
                 child: Text(
                   'jour${streak > 1 ? 's' : ''}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textMuted,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -719,7 +739,7 @@ class _StreakCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Série en cours · record $best',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
@@ -795,7 +815,7 @@ class _TasksOrb extends StatelessWidget {
                     value: ratio == 0 ? null : ratio,
                     strokeWidth: 5,
                     backgroundColor: AppColors.surfaceHover,
-                    valueColor: const AlwaysStoppedAnimation(AppColors.blue),
+                    valueColor: AlwaysStoppedAnimation(AppColors.blue),
                   ),
                 ),
                 Icon(
@@ -816,7 +836,7 @@ class _TasksOrb extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          const Text(
+          Text(
             'tâches',
             style: TextStyle(
               color: AppColors.textMuted,
@@ -855,7 +875,7 @@ class _WeekRhythmCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [AppColors.cyan, AppColors.indigo],
               ),
               borderRadius: BorderRadius.circular(16),
@@ -871,7 +891,7 @@ class _WeekRhythmCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'CETTE SEMAINE',
                   style: TextStyle(
                     color: AppColors.textMuted,
@@ -906,7 +926,7 @@ class _WeekRhythmCard extends StatelessWidget {
             children: [
               Text(
                 '${week.totalSessions} sessions',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -915,7 +935,7 @@ class _WeekRhythmCard extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 '${week.averagePerDay.asDuration} / jour',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -1013,11 +1033,20 @@ class _SubjectSpotlight extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: color.withValues(alpha: .28)),
+          border: Border.all(
+            color: color.withValues(
+              alpha: AppColors.isLight ? .16 : .28,
+            ),
+          ),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [color.withValues(alpha: .16), AppColors.surfaceGlass],
+            colors: [
+              color.withValues(
+                alpha: AppColors.isLight ? .05 : .16,
+              ),
+              AppColors.surfaceGlass,
+            ],
           ),
         ),
         child: Column(
@@ -1044,7 +1073,7 @@ class _SubjectSpotlight extends StatelessWidget {
               subject.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
@@ -1055,7 +1084,7 @@ class _SubjectSpotlight extends StatelessWidget {
               '${subject.totalMinutes.asDuration} · ${subject.totalSessions} sess.',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textMuted,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
@@ -1096,12 +1125,12 @@ class _MotivationStrip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.spa_rounded, color: AppColors.green, size: 18),
+          Icon(Icons.spa_rounded, color: AppColors.green, size: 18),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               'La régularité bat l\'intensité. Une petite session vaut mieux qu\'aucune.',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,
                 height: 1.4,
@@ -1207,16 +1236,12 @@ class _ErrorState extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       children: [
         const SizedBox(height: 100),
-        const Icon(
-          Icons.cloud_off_rounded,
-          size: 48,
-          color: AppColors.textMuted,
-        ),
+        Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.textMuted),
         const SizedBox(height: 16),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 20),
         Center(

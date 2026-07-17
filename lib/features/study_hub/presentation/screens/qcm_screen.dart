@@ -41,10 +41,10 @@ class QcmScreen extends ConsumerWidget {
       body: packAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text(e.toString(), style: const TextStyle(color: AppColors.red)),
+          child: Text(e.toString(), style: TextStyle(color: AppColors.red)),
         ),
         data: (p) => p.qcm.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text(
                   'Aucune question QCM dans ce pack.',
                   style: TextStyle(color: AppColors.textMuted),
@@ -132,7 +132,9 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
 
     // Topic filter
     if (_selectedTopic != 'all') {
-      list = list.where((q) => (q.topic ?? 'Général') == _selectedTopic).toList();
+      list = list
+          .where((q) => (q.topic ?? 'Général') == _selectedTopic)
+          .toList();
     }
 
     // Mode filter
@@ -243,10 +245,14 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
   Future<void> _saveAttemptToBackend() async {
     setState(() => _isSavingAttempt = true);
 
-    final answeredQuestions = _activeQuestions.where((q) => _revealedAnswers[q.id] == true).toList();
-    final score = _activeQuestions.where((q) => _isCorrectAnswers[q.id] == true).length;
+    final answeredQuestions = _activeQuestions
+        .where((q) => _revealedAnswers[q.id] == true)
+        .toList();
+    final score = _activeQuestions
+        .where((q) => _isCorrectAnswers[q.id] == true)
+        .length;
     final total = _activeQuestions.length;
-    
+
     final divisor = _quizFinished ? total : answeredQuestions.length;
     final pct = divisor > 0 ? (score / divisor * 100).round() : 0;
 
@@ -292,7 +298,7 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: AppColors.surfaceGlass,
-          title: const Text(
+          title: Text(
             '💾 Sauvegarder avant de partir ?',
             style: TextStyle(
               color: AppColors.textPrimary,
@@ -306,7 +312,7 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
             children: [
               Text(
                 'Vous avez répondu à $answeredCount/$totalCount questions.',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
@@ -314,12 +320,9 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Sauvegarder maintenant pour conserver votre progression dans votre historique.',
-                style: TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 11),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -336,7 +339,10 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text('Sauvegarder et quitter', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'Sauvegarder et quitter',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop('leave'),
@@ -347,11 +353,21 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text('Quitter sans sauver', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              child: const Text(
+                'Quitter sans sauver',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop('stay'),
-              child: const Text('Rester sur le quiz', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w700)),
+              child: Text(
+                'Rester sur le quiz',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         );
@@ -371,7 +387,9 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
   @override
   Widget build(BuildContext context) {
     if (_quizFinished) {
-      final correctCount = _activeQuestions.where((q) => _isCorrectAnswers[q.id] == true).length;
+      final correctCount = _activeQuestions
+          .where((q) => _isCorrectAnswers[q.id] == true)
+          .length;
       return _ScoreScreen(
         correct: correctCount,
         total: _activeQuestions.length,
@@ -386,11 +404,23 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
     final textTheme = Theme.of(context).textTheme;
 
     // Get list of topics
-    final topics = widget.pack.qcm.map((q) => q.topic ?? 'Général').toSet().toList();
+    final topics = widget.pack.qcm
+        .map((q) => q.topic ?? 'Général')
+        .toSet()
+        .toList();
 
-    final correctCount = _activeQuestions.where((q) => _isCorrectAnswers[q.id] == true).length;
-    final wrongCount = _activeQuestions.where((q) => _revealedAnswers[q.id] == true && _isCorrectAnswers[q.id] != true).length;
-    final remainingCount = total - _activeQuestions.where((q) => _revealedAnswers[q.id] == true).length;
+    final correctCount = _activeQuestions
+        .where((q) => _isCorrectAnswers[q.id] == true)
+        .length;
+    final wrongCount = _activeQuestions
+        .where(
+          (q) =>
+              _revealedAnswers[q.id] == true && _isCorrectAnswers[q.id] != true,
+        )
+        .length;
+    final remainingCount =
+        total -
+        _activeQuestions.where((q) => _revealedAnswers[q.id] == true).length;
     final pct = total > 0 ? (correctCount / total * 100).round() : 0;
 
     final answeredCount = _selectedAnswers.length;
@@ -407,238 +437,268 @@ class _QuizBodyState extends ConsumerState<_QuizBody> {
       },
       child: Column(
         children: [
-        // ── Timer & Stats ──
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Progression',
-                style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w800,
+          // ── Timer & Stats ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Progression',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceGlass,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.timer_outlined, size: 13, color: AppColors.green),
-                    const SizedBox(width: 6),
-                    Text(
-                      _formattedTime,
-                      style: const TextStyle(
-                        fontFamily: 'JetBrains Mono',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.textPrimary,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceGlass,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: 13,
+                        color: AppColors.green,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Live stats cells
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-          child: Row(
-            children: [
-              _StatCell(value: '$total', label: 'Total', color: AppColors.indigo),
-              const SizedBox(width: 8),
-              _StatCell(value: '$correctCount', label: 'Juste', color: AppColors.green),
-              const SizedBox(width: 8),
-              _StatCell(value: '$wrongCount', label: 'Faux', color: AppColors.red),
-              const SizedBox(width: 8),
-              _StatCell(value: '$remainingCount', label: 'Reste', color: AppColors.yellow),
-              const SizedBox(width: 8),
-              _StatCell(value: '$pct%', label: 'Score', color: AppColors.cyan),
-            ],
-          ),
-        ),
-
-        // ── Topic Filter Pills & Controls ──
-        Container(
-          height: 38,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              _FilterPill(
-                label: 'Tout',
-                isActive: _selectedTopic == 'all',
-                onTap: () => _setTopic('all'),
-              ),
-              for (final topic in topics) ...[
-                const SizedBox(width: 8),
-                _FilterPill(
-                  label: topic,
-                  isActive: _selectedTopic == topic,
-                  onTap: () => _setTopic(topic),
+                      const SizedBox(width: 6),
+                      Text(
+                        _formattedTime,
+                        style: TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ],
-          ),
-        ),
-
-        // Mode filters row
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              _ModeFilterButton(
-                label: 'Tout',
-                isActive: _selectedMode == 'all',
-                onTap: () => _setModeFilter('all'),
-              ),
-              const SizedBox(width: 8),
-              _ModeFilterButton(
-                label: 'Erreurs',
-                isActive: _selectedMode == 'wrong',
-                onTap: () => _setModeFilter('wrong'),
-              ),
-              const SizedBox(width: 8),
-              _ModeFilterButton(
-                label: 'Signets',
-                isActive: _selectedMode == 'bookmarks',
-                onTap: () => _setModeFilter('bookmarks'),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: _shuffle,
-                icon: const Icon(Icons.shuffle_rounded, size: 18),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.surfaceGlass,
-                  side: BorderSide(color: AppColors.border),
-                ),
-              ),
-              const SizedBox(width: 6),
-              IconButton(
-                onPressed: _reset,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.surfaceGlass,
-                  side: BorderSide(color: AppColors.border),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // ── Dot Navigator Grid ──
-        if (total > 0)
-          Container(
-            height: 38,
-            margin: const EdgeInsets.symmetric(vertical: 12),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: total,
-              itemBuilder: (context, index) {
-                final q = _activeQuestions[index];
-                final isCurrent = _currentIndex == index;
-                final revealed = _revealedAnswers[q.id] ?? false;
-                final isCorrect = _isCorrectAnswers[q.id] ?? false;
-
-                Color bgColor = AppColors.surfaceGlass;
-                Color borderColor = AppColors.border;
-                Color textColor = AppColors.textSecondary;
-
-                if (isCurrent) {
-                  bgColor = AppColors.accent;
-                  borderColor = AppColors.accent;
-                  textColor = Colors.white;
-                } else if (revealed) {
-                  if (isCorrect) {
-                    bgColor = AppColors.green.withValues(alpha: .15);
-                    borderColor = AppColors.green;
-                    textColor = AppColors.green;
-                  } else {
-                    bgColor = AppColors.red.withValues(alpha: .15);
-                    borderColor = AppColors.red;
-                    textColor = AppColors.red;
-                  }
-                }
-
-                return GestureDetector(
-                  onTap: () => _jumpToQuestion(index),
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    margin: const EdgeInsets.only(right: 6),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: borderColor, width: 1.5),
-                    ),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        if (_bookmarkedIds.contains(q.id))
-                          const Positioned(
-                            top: -12,
-                            right: -12,
-                            child: Icon(Icons.bookmark_rounded,
-                                color: AppColors.yellow, size: 10),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
             ),
           ),
 
-        // ── Main PageView ──
-        Expanded(
-          child: total == 0
-              ? const _EmptyStateView()
-              : PageView.builder(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (i) => setState(() => _currentIndex = i),
-                  itemCount: total,
-                  itemBuilder: (context, index) {
-                    final q = _activeQuestions[index];
-                    final selected = _selectedAnswers[q.id];
-                    final revealed = _revealedAnswers[q.id] == true;
-
-                    return _QuestionCard(
-                      question: q,
-                      index: index,
-                      selected: selected,
-                      revealed: revealed,
-                      isBookmarked: _bookmarkedIds.contains(q.id),
-                      onBookmark: () => _toggleBookmark(q.id),
-                      onSelect: (ans) => _selectAnswer(q.id, ans, q),
-                      onNext: _goNext,
-                      isLast: index == total - 1,
-                    );
-                  },
+          // Live stats cells
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            child: Row(
+              children: [
+                _StatCell(
+                  value: '$total',
+                  label: 'Total',
+                  color: AppColors.indigo,
                 ),
-        ),
-      ],
-    ),
-  );
-}
+                const SizedBox(width: 8),
+                _StatCell(
+                  value: '$correctCount',
+                  label: 'Juste',
+                  color: AppColors.green,
+                ),
+                const SizedBox(width: 8),
+                _StatCell(
+                  value: '$wrongCount',
+                  label: 'Faux',
+                  color: AppColors.red,
+                ),
+                const SizedBox(width: 8),
+                _StatCell(
+                  value: '$remainingCount',
+                  label: 'Reste',
+                  color: AppColors.yellow,
+                ),
+                const SizedBox(width: 8),
+                _StatCell(
+                  value: '$pct%',
+                  label: 'Score',
+                  color: AppColors.cyan,
+                ),
+              ],
+            ),
+          ),
+
+          // ── Topic Filter Pills & Controls ──
+          Container(
+            height: 38,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              children: [
+                _FilterPill(
+                  label: 'Tout',
+                  isActive: _selectedTopic == 'all',
+                  onTap: () => _setTopic('all'),
+                ),
+                for (final topic in topics) ...[
+                  const SizedBox(width: 8),
+                  _FilterPill(
+                    label: topic,
+                    isActive: _selectedTopic == topic,
+                    onTap: () => _setTopic(topic),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // Mode filters row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                _ModeFilterButton(
+                  label: 'Tout',
+                  isActive: _selectedMode == 'all',
+                  onTap: () => _setModeFilter('all'),
+                ),
+                const SizedBox(width: 8),
+                _ModeFilterButton(
+                  label: 'Erreurs',
+                  isActive: _selectedMode == 'wrong',
+                  onTap: () => _setModeFilter('wrong'),
+                ),
+                const SizedBox(width: 8),
+                _ModeFilterButton(
+                  label: 'Signets',
+                  isActive: _selectedMode == 'bookmarks',
+                  onTap: () => _setModeFilter('bookmarks'),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: _shuffle,
+                  icon: const Icon(Icons.shuffle_rounded, size: 18),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.surfaceGlass,
+                    side: BorderSide(color: AppColors.border),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                IconButton(
+                  onPressed: _reset,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.surfaceGlass,
+                    side: BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Dot Navigator Grid ──
+          if (total > 0)
+            Container(
+              height: 38,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: total,
+                itemBuilder: (context, index) {
+                  final q = _activeQuestions[index];
+                  final isCurrent = _currentIndex == index;
+                  final revealed = _revealedAnswers[q.id] ?? false;
+                  final isCorrect = _isCorrectAnswers[q.id] ?? false;
+
+                  Color bgColor = AppColors.surfaceGlass;
+                  Color borderColor = AppColors.border;
+                  Color textColor = AppColors.textSecondary;
+
+                  if (isCurrent) {
+                    bgColor = AppColors.accent;
+                    borderColor = AppColors.accent;
+                    textColor = Colors.white;
+                  } else if (revealed) {
+                    if (isCorrect) {
+                      bgColor = AppColors.green.withValues(alpha: .15);
+                      borderColor = AppColors.green;
+                      textColor = AppColors.green;
+                    } else {
+                      bgColor = AppColors.red.withValues(alpha: .15);
+                      borderColor = AppColors.red;
+                      textColor = AppColors.red;
+                    }
+                  }
+
+                  return GestureDetector(
+                    onTap: () => _jumpToQuestion(index),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      margin: const EdgeInsets.only(right: 6),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: borderColor, width: 1.5),
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          if (_bookmarkedIds.contains(q.id))
+                            Positioned(
+                              top: -12,
+                              right: -12,
+                              child: Icon(
+                                Icons.bookmark_rounded,
+                                color: AppColors.yellow,
+                                size: 10,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+          // ── Main PageView ──
+          Expanded(
+            child: total == 0
+                ? const _EmptyStateView()
+                : PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (i) => setState(() => _currentIndex = i),
+                    itemCount: total,
+                    itemBuilder: (context, index) {
+                      final q = _activeQuestions[index];
+                      final selected = _selectedAnswers[q.id];
+                      final revealed = _revealedAnswers[q.id] == true;
+
+                      return _QuestionCard(
+                        question: q,
+                        index: index,
+                        selected: selected,
+                        revealed: revealed,
+                        isBookmarked: _bookmarkedIds.contains(q.id),
+                        onBookmark: () => _toggleBookmark(q.id),
+                        onSelect: (ans) => _selectAnswer(q.id, ans, q),
+                        onNext: _goNext,
+                        isLast: index == total - 1,
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatCell extends StatelessWidget {
@@ -676,7 +736,7 @@ class _StatCell extends StatelessWidget {
             const SizedBox(height: 1),
             Text(
               label.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w800,
                 fontSize: 7,
@@ -756,10 +816,14 @@ class _ModeFilterButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.indigo.withValues(alpha: .15) : Colors.transparent,
+          color: isActive
+              ? AppColors.indigo.withValues(alpha: .15)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? AppColors.indigo.withValues(alpha: .35) : Colors.transparent,
+            color: isActive
+                ? AppColors.indigo.withValues(alpha: .35)
+                : Colors.transparent,
           ),
         ),
         child: Text(
@@ -794,17 +858,25 @@ class _EmptyStateView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.accent.withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.accent.withValues(alpha: .15)),
+                border: Border.all(
+                  color: AppColors.accent.withValues(alpha: .15),
+                ),
               ),
-              child: const Icon(Icons.inbox_rounded, color: AppColors.textMuted, size: 24),
+              child: Icon(
+                Icons.inbox_rounded,
+                color: AppColors.textMuted,
+                size: 24,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'Aucune question trouvée',
-              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Veuillez modifier vos filtres ou signets.',
               style: TextStyle(color: AppColors.textMuted, fontSize: 11),
               textAlign: TextAlign.center,
@@ -862,7 +934,7 @@ class _QuestionCard extends StatelessWidget {
               ),
               child: Text(
                 question.topic ?? 'Général',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.accentBright,
                   fontSize: 9,
                   fontWeight: FontWeight.w800,
@@ -872,7 +944,9 @@ class _QuestionCard extends StatelessWidget {
             IconButton(
               onPressed: onBookmark,
               icon: Icon(
-                isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                isBookmarked
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_border_rounded,
                 color: isBookmarked ? AppColors.yellow : AppColors.textMuted,
                 size: 20,
               ),
@@ -902,8 +976,7 @@ class _QuestionCard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // Answers
-        if (question.type == 'multiple-choice')
-          ..._buildMultipleChoice(),
+        if (question.type == 'multiple-choice') ..._buildMultipleChoice(),
 
         if (question.type == 'true-false') ..._buildTrueFalse(),
 
@@ -974,7 +1047,8 @@ class _QuestionCard extends StatelessWidget {
               text: 'Vrai',
               isSelected: selected == 'true',
               isCorrect: revealed && question.isCorrect('true'),
-              isWrong: revealed && selected == 'true' && !question.isCorrect('true'),
+              isWrong:
+                  revealed && selected == 'true' && !question.isCorrect('true'),
               revealed: revealed,
               onTap: () => onSelect('true'),
             ),
@@ -986,7 +1060,10 @@ class _QuestionCard extends StatelessWidget {
               text: 'Faux',
               isSelected: selected == 'false',
               isCorrect: revealed && question.isCorrect('false'),
-              isWrong: revealed && selected == 'false' && !question.isCorrect('false'),
+              isWrong:
+                  revealed &&
+                  selected == 'false' &&
+                  !question.isCorrect('false'),
               revealed: revealed,
               onTap: () => onSelect('false'),
             ),
@@ -1094,9 +1171,13 @@ class _AnswerCell extends StatelessWidget {
                 ),
               ),
               if (revealed && isCorrect)
-                const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.green,
+                  size: 20,
+                ),
               if (revealed && isWrong)
-                const Icon(Icons.cancel_rounded, color: AppColors.red, size: 20),
+                Icon(Icons.cancel_rounded, color: AppColors.red, size: 20),
             ],
           ),
         ),
@@ -1140,13 +1221,13 @@ class _FillBlanksBoxState extends State<_FillBlanksBox> {
         TextField(
           controller: _controller,
           enabled: !widget.revealed,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: 'Votre réponse…',
-            hintStyle: const TextStyle(color: AppColors.textMuted),
+            hintStyle: TextStyle(color: AppColors.textMuted),
             filled: true,
             fillColor: AppColors.surfaceGlass,
             border: OutlineInputBorder(
@@ -1159,7 +1240,7 @@ class _FillBlanksBoxState extends State<_FillBlanksBox> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.accent, width: 2),
+              borderSide: BorderSide(color: AppColors.accent, width: 2),
             ),
           ),
         ),
@@ -1194,10 +1275,7 @@ class _FillBlanksBoxState extends State<_FillBlanksBox> {
 // ══════════════════════════════════════════════════════════
 
 class _ExplanationBox extends StatelessWidget {
-  const _ExplanationBox({
-    required this.question,
-    required this.isCorrect,
-  });
+  const _ExplanationBox({required this.question, required this.isCorrect});
 
   final QCM question;
   final bool isCorrect;
@@ -1240,7 +1318,8 @@ class _ExplanationBox extends StatelessWidget {
               ),
             ],
           ),
-          if (question.explanation != null && question.explanation!.isNotEmpty) ...[
+          if (question.explanation != null &&
+              question.explanation!.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
               question.explanation!,
@@ -1257,12 +1336,18 @@ class _ExplanationBox extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.yellow.withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.yellow.withValues(alpha: .2)),
+                border: Border.all(
+                  color: AppColors.yellow.withValues(alpha: .2),
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.warning_rounded, color: AppColors.yellow, size: 14),
+                  Icon(
+                    Icons.warning_rounded,
+                    color: AppColors.yellow,
+                    size: 14,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -1332,17 +1417,18 @@ class _ScoreScreen extends StatelessWidget {
                     colors: isExcellent
                         ? [AppColors.green, const Color(0xFF059669)]
                         : isGood
-                            ? [AppColors.accent, AppColors.indigo]
-                            : [AppColors.red, const Color(0xFFDC2626)],
+                        ? [AppColors.accent, AppColors.indigo]
+                        : [AppColors.red, const Color(0xFFDC2626)],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (isExcellent
-                              ? AppColors.green
-                              : isGood
+                      color:
+                          (isExcellent
+                                  ? AppColors.green
+                                  : isGood
                                   ? AppColors.accent
                                   : AppColors.red)
-                          .withValues(alpha: .35),
+                              .withValues(alpha: .35),
                       blurRadius: 28,
                       offset: const Offset(0, 8),
                     ),
@@ -1380,8 +1466,8 @@ class _ScoreScreen extends StatelessWidget {
               isExcellent
                   ? 'Excellent !'
                   : isGood
-                      ? 'Bien joué !'
-                      : 'Continuez à réviser',
+                  ? 'Bien joué !'
+                  : 'Continuez à réviser',
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
@@ -1393,9 +1479,11 @@ class _ScoreScreen extends StatelessWidget {
               isExcellent
                   ? 'Vous maîtrisez ce sujet parfaitement.'
                   : isGood
-                      ? 'Encore un effort pour tout maîtriser.'
-                      : 'Révisez le contenu et réessayez.',
-              style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                  ? 'Encore un effort pour tout maîtriser.'
+                  : 'Révisez le contenu et réessayez.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
 
@@ -1403,33 +1491,47 @@ class _ScoreScreen extends StatelessWidget {
 
             // Attempts saving notification
             if (isSaving)
-              const Center(
+              Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentText),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accentText,
+                      ),
                     ),
                     SizedBox(width: 8),
                     Text(
                       'Enregistrement de l\'essai...',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
               )
             else
-              const Center(
+              Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.cloud_done_rounded, color: AppColors.green, size: 14),
+                    Icon(
+                      Icons.cloud_done_rounded,
+                      color: AppColors.green,
+                      size: 14,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Essai enregistré sur le cloud',
-                      style: TextStyle(color: AppColors.green, fontSize: 11, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: AppColors.green,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -1450,14 +1552,18 @@ class _ScoreScreen extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'TEMPS TOTAL',
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 8, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           timeStr,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w800,
                             fontSize: 14,
@@ -1471,14 +1577,18 @@ class _ScoreScreen extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'QUESTIONS',
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 8, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '$total',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w800,
                             fontSize: 14,
@@ -1517,7 +1627,7 @@ class _ScoreScreen extends StatelessWidget {
             const SizedBox(height: 10),
             TextButton(
               onPressed: onClose,
-              child: const Text(
+              child: Text(
                 'Retour au pack',
                 style: TextStyle(
                   color: AppColors.textSecondary,

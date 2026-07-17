@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 import 'app/app.dart';
+import 'app/theme/theme_controller.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('fr_FR', null);
+  // Load the saved theme preference before the first frame so the app never
+  // flashes the wrong mode at startup.
+  ThemeController.initialMode = await loadInitialThemeMode();
   runApp(const ProviderScope(child: EduFocusApp()));
 }

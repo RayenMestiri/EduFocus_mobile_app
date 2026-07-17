@@ -114,7 +114,7 @@ class _SubjectFormSheetState extends ConsumerState<_SubjectFormSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(top: BorderSide(color: AppColors.borderBright)),
@@ -151,7 +151,7 @@ class _SubjectFormSheetState extends ConsumerState<_SubjectFormSheet> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     _error!,
-                    style: const TextStyle(color: AppColors.red, fontSize: 13),
+                    style: TextStyle(color: AppColors.red, fontSize: 13),
                   ),
                 ),
               TextField(

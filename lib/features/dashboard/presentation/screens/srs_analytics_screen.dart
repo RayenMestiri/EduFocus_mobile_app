@@ -31,11 +31,11 @@ class SrsAnalyticsScreen extends ConsumerWidget {
       body: packsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
-          child: Text(err.toString(), style: const TextStyle(color: AppColors.red)),
+          child: Text(err.toString(), style: TextStyle(color: AppColors.red)),
         ),
         data: (packs) {
           if (packs.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Aucune donnée de révision disponible.',
                 style: TextStyle(color: AppColors.textMuted),
@@ -96,7 +96,9 @@ class SrsAnalyticsScreen extends ConsumerWidget {
           }).length;
 
           final retentionRate = totalReviewed > 0
-              ? (((totalReviewed - lapses) / totalReviewed) * 100).round().clamp(0, 100)
+              ? (((totalReviewed - lapses) / totalReviewed) * 100)
+                    .round()
+                    .clamp(0, 100)
               : 100;
 
           return RefreshIndicator(
@@ -110,9 +112,19 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                 // ── Header Stat Row ──
                 Row(
                   children: [
-                    _OverviewCell(value: '$totalCards', label: 'Cartes Totales', icon: Icons.style_rounded, color: AppColors.blue),
+                    _OverviewCell(
+                      value: '$totalCards',
+                      label: 'Cartes Totales',
+                      icon: Icons.style_rounded,
+                      color: AppColors.blue,
+                    ),
                     const SizedBox(width: 12),
-                    _OverviewCell(value: '${packs.length}', label: 'Packs d\'Étude', icon: Icons.folder_rounded, color: AppColors.accent),
+                    _OverviewCell(
+                      value: '${packs.length}',
+                      label: 'Packs d\'Étude',
+                      icon: Icons.folder_rounded,
+                      color: AppColors.accent,
+                    ),
                   ],
                 ),
 
@@ -134,7 +146,10 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.green.withValues(alpha: .08),
-                          border: Border.all(color: AppColors.green.withValues(alpha: .25), width: 3),
+                          border: Border.all(
+                            color: AppColors.green.withValues(alpha: .25),
+                            width: 3,
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: Column(
@@ -142,14 +157,14 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               '$retentionRate%',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.green,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 20,
                                 fontFamily: 'JetBrains Mono',
                               ),
                             ),
-                            const Text(
+                            Text(
                               'Retenu',
                               style: TextStyle(
                                 color: AppColors.textMuted,
@@ -193,7 +208,10 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                 // ── Cards Distribution ──
                 Text(
                   'Distribution des Cartes',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3),
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -213,22 +231,54 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               _barSegment(newCount, totalCards, AppColors.blue),
-                              _barSegment(learningCount, totalCards, AppColors.yellow),
-                              _barSegment(reviewCount, totalCards, AppColors.accent),
-                              _barSegment(masteredCount, totalCards, AppColors.green),
+                              _barSegment(
+                                learningCount,
+                                totalCards,
+                                AppColors.yellow,
+                              ),
+                              _barSegment(
+                                reviewCount,
+                                totalCards,
+                                AppColors.accent,
+                              ),
+                              _barSegment(
+                                masteredCount,
+                                totalCards,
+                                AppColors.green,
+                              ),
                             ],
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       // Stats breakdown list
-                      _DistributionLegendRow(label: 'Nouveau', count: newCount, total: totalCards, color: AppColors.blue),
+                      _DistributionLegendRow(
+                        label: 'Nouveau',
+                        count: newCount,
+                        total: totalCards,
+                        color: AppColors.blue,
+                      ),
                       const SizedBox(height: 8),
-                      _DistributionLegendRow(label: 'Apprentissage', count: learningCount, total: totalCards, color: AppColors.yellow),
+                      _DistributionLegendRow(
+                        label: 'Apprentissage',
+                        count: learningCount,
+                        total: totalCards,
+                        color: AppColors.yellow,
+                      ),
                       const SizedBox(height: 8),
-                      _DistributionLegendRow(label: 'Révision', count: reviewCount, total: totalCards, color: AppColors.accent),
+                      _DistributionLegendRow(
+                        label: 'Révision',
+                        count: reviewCount,
+                        total: totalCards,
+                        color: AppColors.accent,
+                      ),
                       const SizedBox(height: 8),
-                      _DistributionLegendRow(label: 'Maîtrisé', count: masteredCount, total: totalCards, color: AppColors.green),
+                      _DistributionLegendRow(
+                        label: 'Maîtrisé',
+                        count: masteredCount,
+                        total: totalCards,
+                        color: AppColors.green,
+                      ),
                     ],
                   ),
                 ),
@@ -246,10 +296,26 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                     crossAxisSpacing: 10,
                   ),
                   children: [
-                    _KpiCell(value: '$dueToday', label: 'À Réviser', color: AppColors.accentBright),
-                    _KpiCell(value: '$overdue', label: 'En Retard', color: AppColors.red),
-                    _KpiCell(value: '$reviewsLast7Days', label: 'Rev. (7j)', color: AppColors.cyan),
-                    _KpiCell(value: '$reviewsLast30Days', label: 'Rev. (30j)', color: AppColors.blue),
+                    _KpiCell(
+                      value: '$dueToday',
+                      label: 'À Réviser',
+                      color: AppColors.accentBright,
+                    ),
+                    _KpiCell(
+                      value: '$overdue',
+                      label: 'En Retard',
+                      color: AppColors.red,
+                    ),
+                    _KpiCell(
+                      value: '$reviewsLast7Days',
+                      label: 'Rev. (7j)',
+                      color: AppColors.cyan,
+                    ),
+                    _KpiCell(
+                      value: '$reviewsLast30Days',
+                      label: 'Rev. (30j)',
+                      color: AppColors.blue,
+                    ),
                   ],
                 ),
 
@@ -258,13 +324,15 @@ class SrsAnalyticsScreen extends ConsumerWidget {
                 // ── Per-pack analysis list ──
                 Text(
                   'Analyses par Pack',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3),
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 const SizedBox(height: 12),
-                for (final p in packs.where((pk) => pk.flashcards.isNotEmpty)) ...[
-                  _PackStatsTile(pack: p),
-                  const SizedBox(height: 8),
-                ],
+                for (final p in packs.where(
+                  (pk) => pk.flashcards.isNotEmpty,
+                )) ...[_PackStatsTile(pack: p), const SizedBox(height: 8)],
               ],
             ),
           );
@@ -324,7 +392,7 @@ class _OverviewCell extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w900,
                       fontSize: 18,
@@ -376,7 +444,7 @@ class _DistributionLegendRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -385,7 +453,7 @@ class _DistributionLegendRow extends StatelessWidget {
         const Spacer(),
         Text(
           '$count ($pct%)',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 11,
             fontWeight: FontWeight.w800,
@@ -516,14 +584,14 @@ class _PackStatsTile extends StatelessWidget {
               children: [
                 Text(
                   '$retention%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.green,
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
                     fontFamily: 'JetBrains Mono',
                   ),
                 ),
-                const Text(
+                Text(
                   'RÉTENTION',
                   style: TextStyle(
                     color: AppColors.green,

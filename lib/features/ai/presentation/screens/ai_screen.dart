@@ -70,7 +70,7 @@ class _AiScreenState extends ConsumerState<AiScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 15,
                       color: AppColors.textPrimary,
@@ -168,7 +168,9 @@ class _AiScreenState extends ConsumerState<AiScreen> {
                           ),
                         const SizedBox(width: 10),
                         Text(
-                          _loading ? 'Analyse en cours…' : 'Analyser ma journée',
+                          _loading
+                              ? 'Analyse en cours…'
+                              : 'Analyser ma journée',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
@@ -190,11 +192,13 @@ class _AiScreenState extends ConsumerState<AiScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.red.withValues(alpha: .08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.red.withValues(alpha: .25)),
+                  border: Border.all(
+                    color: AppColors.red.withValues(alpha: .25),
+                  ),
                 ),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: AppColors.red, fontSize: 13),
+                  style: TextStyle(color: AppColors.red, fontSize: 13),
                 ),
               ),
 
@@ -212,7 +216,7 @@ class _AiScreenState extends ConsumerState<AiScreen> {
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(color: AppColors.border),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.tips_and_updates_rounded,
                         color: AppColors.accentText,
                         size: 32,
@@ -252,13 +256,13 @@ class _AiScreenState extends ConsumerState<AiScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.smart_toy_rounded,
                           size: 16,
                           color: AppColors.accentText,
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'AI COACH',
                           style: TextStyle(
                             color: AppColors.accentText,

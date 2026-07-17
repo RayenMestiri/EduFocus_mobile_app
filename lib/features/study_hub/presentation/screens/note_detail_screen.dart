@@ -54,12 +54,19 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
 
   // Accent palette offered in the editor (vivid, tuned for the dark canvas).
   static const _colors = [
-    '#8B5CF6', '#6366F1', '#3B82F6', '#22D3EE',
-    '#34D399', '#FBBF24', '#F97316', '#F87171',
+    '#8B5CF6',
+    '#6366F1',
+    '#3B82F6',
+    '#22D3EE',
+    '#34D399',
+    '#FBBF24',
+    '#F97316',
+    '#F87171',
   ];
   String _selectedColor = '#8B5CF6';
 
-  Color get _accent => _parseHexColor(_editMode ? _selectedColor : _currentNote.color);
+  Color get _accent =>
+      _parseHexColor(_editMode ? _selectedColor : _currentNote.color);
 
   @override
   void initState() {
@@ -109,7 +116,8 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: color ?? AppColors.surfaceHover,
+        // null → theme toast (dark pill on light canvas, soft on dark).
+        backgroundColor: color,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -118,34 +126,45 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
   Future<void> _togglePin() async {
     setState(() => _isSaving = true);
     try {
-      final pack = await ref.read(studyPacksRepositoryProvider).getById(widget.packId);
-      final updatedNotes = pack.notes.map((n) {
-        return n.id == _currentNote.id
-            ? Note(
-                id: n.id,
-                title: n.title,
-                content: n.content,
-                tags: n.tags,
-                isPinned: !n.isPinned,
-                color: n.color,
-                createdAt: n.createdAt,
-                updatedAt: DateTime.now(),
-              )
-            : n;
-      }).map((n) => n.toJson()).toList();
-
-      final updatedPack = await ref
+      final pack = await ref
           .read(studyPacksRepositoryProvider)
-          .update(widget.packId, {'notes': updatedNotes});
+          .getById(widget.packId);
+      final updatedNotes = pack.notes
+          .map((n) {
+            return n.id == _currentNote.id
+                ? Note(
+                    id: n.id,
+                    title: n.title,
+                    content: n.content,
+                    tags: n.tags,
+                    isPinned: !n.isPinned,
+                    color: n.color,
+                    createdAt: n.createdAt,
+                    updatedAt: DateTime.now(),
+                  )
+                : n;
+          })
+          .map((n) => n.toJson())
+          .toList();
+
+      final updatedPack = await ref.read(studyPacksRepositoryProvider).update(
+        widget.packId,
+        {'notes': updatedNotes},
+      );
       ref.invalidate(studyPackProvider(widget.packId));
       ref.invalidate(studyPacksProvider);
 
-      final newNote = updatedPack.notes.firstWhere((n) => n.id == _currentNote.id);
+      final newNote = updatedPack.notes.firstWhere(
+        (n) => n.id == _currentNote.id,
+      );
       setState(() {
         _currentNote = newNote;
         _isPinned = newNote.isPinned;
       });
-      _snack(_isPinned ? 'Note épinglée' : 'Épingle retirée', color: AppColors.accent);
+      _snack(
+        _isPinned ? 'Note épinglée' : 'Épingle retirée',
+        color: AppColors.accent,
+      );
     } catch (e) {
       _snack('Impossible de modifier l\'épingle', color: AppColors.red);
     } finally {
@@ -160,35 +179,43 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
     }
     setState(() => _isSaving = true);
     try {
-      final pack = await ref.read(studyPacksRepositoryProvider).getById(widget.packId);
+      final pack = await ref
+          .read(studyPacksRepositoryProvider)
+          .getById(widget.packId);
       final tags = _tagsController.text
           .split(',')
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
 
-      final updatedNotes = pack.notes.map((n) {
-        return n.id == _currentNote.id
-            ? Note(
-                id: n.id,
-                title: _titleController.text.trim(),
-                content: _contentController.text.trim(),
-                tags: tags,
-                isPinned: _isPinned,
-                color: _selectedColor,
-                createdAt: n.createdAt,
-                updatedAt: DateTime.now(),
-              )
-            : n;
-      }).map((n) => n.toJson()).toList();
+      final updatedNotes = pack.notes
+          .map((n) {
+            return n.id == _currentNote.id
+                ? Note(
+                    id: n.id,
+                    title: _titleController.text.trim(),
+                    content: _contentController.text.trim(),
+                    tags: tags,
+                    isPinned: _isPinned,
+                    color: _selectedColor,
+                    createdAt: n.createdAt,
+                    updatedAt: DateTime.now(),
+                  )
+                : n;
+          })
+          .map((n) => n.toJson())
+          .toList();
 
-      final updatedPack = await ref
-          .read(studyPacksRepositoryProvider)
-          .update(widget.packId, {'notes': updatedNotes});
+      final updatedPack = await ref.read(studyPacksRepositoryProvider).update(
+        widget.packId,
+        {'notes': updatedNotes},
+      );
       ref.invalidate(studyPackProvider(widget.packId));
       ref.invalidate(studyPacksProvider);
 
-      final newNote = updatedPack.notes.firstWhere((n) => n.id == _currentNote.id);
+      final newNote = updatedPack.notes.firstWhere(
+        (n) => n.id == _currentNote.id,
+      );
       setState(() {
         _currentNote = newNote;
         _selectedColor = newNote.color;
@@ -224,7 +251,10 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                   gradient: RadialGradient(
                     center: const Alignment(0, -0.4),
                     radius: 0.9,
-                    colors: [_accent.withValues(alpha: .16), Colors.transparent],
+                    colors: [
+                      _accent.withValues(alpha: .16),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
               ),
@@ -246,7 +276,10 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.surfaceGlass,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: _accent.withValues(alpha: .35), width: 1.5),
+                  border: Border.all(
+                    color: _accent.withValues(alpha: .35),
+                    width: 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: _accent.withValues(alpha: 0.2),
@@ -293,7 +326,10 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             ),
             title: Text(
               _editMode ? 'Édition' : 'Note',
-              style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.4),
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+              ),
             ),
             actions: _editMode
                 ? [
@@ -316,10 +352,16 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                           style: TextButton.styleFrom(
                             backgroundColor: _accent.withValues(alpha: .15),
                             foregroundColor: _accent,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: _accent.withValues(alpha: .35), width: 1.2),
+                              side: BorderSide(
+                                color: _accent.withValues(alpha: .35),
+                                width: 1.2,
+                              ),
                             ),
                           ),
                           child: Text(
@@ -344,7 +386,9 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                     _GhostIconButton(
                       icon: Icons.copy_all_rounded,
                       onTap: () {
-                        Clipboard.setData(ClipboardData(text: _currentNote.content));
+                        Clipboard.setData(
+                          ClipboardData(text: _currentNote.content),
+                        );
                         _snack('Contenu copié', color: AppColors.accent);
                       },
                     ),
@@ -385,7 +429,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             if (note.createdAt != null)
               Text(
                 _formatDate(note.updatedAt ?? note.createdAt!),
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
@@ -394,7 +438,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             if (words > 0)
               Text(
                 '·  $words mots  ·  $readMins min',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
@@ -446,7 +490,10 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             children: [
               for (final tag in note.tags)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: _accent.withValues(alpha: .12),
                     borderRadius: BorderRadius.circular(8),
@@ -513,7 +560,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                     Expanded(
                       child: TextField(
                         controller: _tagsController,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
@@ -554,7 +601,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Accent',
                   style: TextStyle(
                     color: AppColors.textMuted,
@@ -585,15 +632,26 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                               color: color,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: active ? Colors.white : Colors.transparent,
+                                color: active
+                                    ? Colors.white
+                                    : Colors.transparent,
                                 width: 2.5,
                               ),
                               boxShadow: active
-                                  ? [BoxShadow(color: color.withValues(alpha: .5), blurRadius: 10)]
+                                  ? [
+                                      BoxShadow(
+                                        color: color.withValues(alpha: .5),
+                                        blurRadius: 10,
+                                      ),
+                                    ]
                                   : null,
                             ),
                             child: active
-                                ? const Icon(Icons.check_rounded, color: Colors.white, size: 15)
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    color: Colors.white,
+                                    size: 15,
+                                  )
                                 : null,
                           ),
                         );
@@ -621,17 +679,52 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _ToolBtn(icon: Icons.title_rounded, label: 'H1', onTap: () => _insertMarkdown('\n# ')),
-                  _ToolBtn(icon: Icons.text_fields_rounded, label: 'H2', onTap: () => _insertMarkdown('\n## ')),
-                  _ToolBtn(icon: Icons.format_bold_rounded, onTap: () => _insertMarkdown('****', caretBack: 2)),
-                  _ToolBtn(icon: Icons.format_italic_rounded, onTap: () => _insertMarkdown('**', caretBack: 1)),
-                  _ToolBtn(icon: Icons.format_list_bulleted_rounded, onTap: () => _insertMarkdown('\n- ')),
-                  _ToolBtn(icon: Icons.checklist_rounded, onTap: () => _insertMarkdown('\n- [ ] ')),
-                  _ToolBtn(icon: Icons.code_rounded, onTap: () => _insertMarkdown('\n```\n\n```', caretBack: 4)),
-                  _ToolBtn(icon: Icons.data_object_rounded, onTap: () => _insertMarkdown('``', caretBack: 1)),
-                  _ToolBtn(icon: Icons.format_quote_rounded, onTap: () => _insertMarkdown('\n> ')),
-                  _ToolBtn(icon: Icons.lightbulb_outline_rounded, onTap: () => _insertMarkdown('\n> [!tip] ')),
-                  _ToolBtn(icon: Icons.highlight_rounded, onTap: () => _insertMarkdown('====', caretBack: 2)),
+                  _ToolBtn(
+                    icon: Icons.title_rounded,
+                    label: 'H1',
+                    onTap: () => _insertMarkdown('\n# '),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.text_fields_rounded,
+                    label: 'H2',
+                    onTap: () => _insertMarkdown('\n## '),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.format_bold_rounded,
+                    onTap: () => _insertMarkdown('****', caretBack: 2),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.format_italic_rounded,
+                    onTap: () => _insertMarkdown('**', caretBack: 1),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.format_list_bulleted_rounded,
+                    onTap: () => _insertMarkdown('\n- '),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.checklist_rounded,
+                    onTap: () => _insertMarkdown('\n- [ ] '),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.code_rounded,
+                    onTap: () => _insertMarkdown('\n```\n\n```', caretBack: 4),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.data_object_rounded,
+                    onTap: () => _insertMarkdown('``', caretBack: 1),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.format_quote_rounded,
+                    onTap: () => _insertMarkdown('\n> '),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.lightbulb_outline_rounded,
+                    onTap: () => _insertMarkdown('\n> [!tip] '),
+                  ),
+                  _ToolBtn(
+                    icon: Icons.highlight_rounded,
+                    onTap: () => _insertMarkdown('====', caretBack: 2),
+                  ),
                 ],
               ),
             ),
@@ -643,8 +736,18 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
 
   String _formatDate(DateTime dt) {
     const months = [
-      'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
-      'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.',
+      'janv.',
+      'févr.',
+      'mars',
+      'avr.',
+      'mai',
+      'juin',
+      'juil.',
+      'août',
+      'sept.',
+      'oct.',
+      'nov.',
+      'déc.',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
@@ -671,7 +774,11 @@ class _GhostIconButton extends StatelessWidget {
 }
 
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({required this.icon, required this.label, required this.color});
+  const _MetaPill({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   final IconData icon;
   final String label;
@@ -693,7 +800,11 @@ class _MetaPill extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -730,7 +841,7 @@ class _ToolBtn extends StatelessWidget {
                   const SizedBox(width: 5),
                   Text(
                     label!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -757,9 +868,13 @@ class _EmptyNote extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
-          Icon(Icons.article_outlined, size: 40, color: accent.withValues(alpha: .5)),
+          Icon(
+            Icons.article_outlined,
+            size: 40,
+            color: accent.withValues(alpha: .5),
+          ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'Cette note est vide',
             style: TextStyle(
               color: AppColors.textSecondary,
@@ -768,7 +883,7 @@ class _EmptyNote extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Touchez « Modifier » pour commencer à écrire.',
             style: TextStyle(color: AppColors.textMuted, fontSize: 12),
           ),
@@ -811,11 +926,13 @@ class _MarkdownView extends StatelessWidget {
           code.add(lines[i]);
           i++;
         }
-        blocks.add(_CodeBlock(
-          code: code.join('\n'),
-          language: lang.isEmpty ? 'code' : lang,
-          onCopy: onCopy,
-        ));
+        blocks.add(
+          _CodeBlock(
+            code: code.join('\n'),
+            language: lang.isEmpty ? 'code' : lang,
+            onCopy: onCopy,
+          ),
+        );
         continue;
       }
 
@@ -834,14 +951,17 @@ class _MarkdownView extends StatelessWidget {
       }
 
       // ── Callout: > [!tip] / [!note] / [!warning] ──
-      final calloutMatch =
-          RegExp(r'^>\s*\[!(\w+)\]\s*(.*)$').firstMatch(trimmed);
+      final calloutMatch = RegExp(
+        r'^>\s*\[!(\w+)\]\s*(.*)$',
+      ).firstMatch(trimmed);
       if (calloutMatch != null) {
-        blocks.add(_Callout(
-          kind: calloutMatch.group(1)!.toLowerCase(),
-          text: calloutMatch.group(2) ?? '',
-          accent: accent,
-        ));
+        blocks.add(
+          _Callout(
+            kind: calloutMatch.group(1)!.toLowerCase(),
+            text: calloutMatch.group(2) ?? '',
+            accent: accent,
+          ),
+        );
         continue;
       }
 
@@ -860,13 +980,32 @@ class _MarkdownView extends StatelessWidget {
 
     // Headings
     if (trimmed.startsWith('### ')) {
-      return _heading(trimmed.substring(4), 16.5, FontWeight.w800, accent, rule: false);
+      return _heading(
+        trimmed.substring(4),
+        16.5,
+        FontWeight.w800,
+        accent,
+        rule: false,
+      );
     }
     if (trimmed.startsWith('## ')) {
-      return _heading(trimmed.substring(3), 19, FontWeight.w800, accent, rule: true);
+      return _heading(
+        trimmed.substring(3),
+        19,
+        FontWeight.w800,
+        accent,
+        rule: true,
+      );
     }
     if (trimmed.startsWith('# ')) {
-      return _heading(trimmed.substring(2), 23, FontWeight.w800, accent, rule: true, full: true);
+      return _heading(
+        trimmed.substring(2),
+        23,
+        FontWeight.w800,
+        accent,
+        rule: true,
+        full: true,
+      );
     }
 
     // Checkboxes
@@ -891,7 +1030,11 @@ class _MarkdownView extends StatelessWidget {
                 ),
               ),
               child: checked
-                  ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    )
                   : null,
             ),
             Expanded(
@@ -926,7 +1069,9 @@ class _MarkdownView extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(child: _RichLine(text: numbered.group(2) ?? '', accent: accent)),
+            Expanded(
+              child: _RichLine(text: numbered.group(2) ?? '', accent: accent),
+            ),
           ],
         ),
       );
@@ -945,7 +1090,9 @@ class _MarkdownView extends StatelessWidget {
               margin: const EdgeInsets.only(top: 8, right: 12),
               decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
             ),
-            Expanded(child: _RichLine(text: trimmed.substring(2), accent: accent)),
+            Expanded(
+              child: _RichLine(text: trimmed.substring(2), accent: accent),
+            ),
           ],
         ),
       );
@@ -1053,15 +1200,21 @@ class _RichLine extends StatelessWidget {
       decorationColor: AppColors.textMuted,
     );
 
-    return Text.rich(TextSpan(style: base, children: _parseInline(text, base, accent)));
+    return Text.rich(
+      TextSpan(style: base, children: _parseInline(text, base, accent)),
+    );
   }
 
-  static List<InlineSpan> _parseInline(String text, TextStyle base, Color accent) {
+  static List<InlineSpan> _parseInline(
+    String text,
+    TextStyle base,
+    Color accent,
+  ) {
     final pattern = RegExp(
-      r'(\*\*(.+?)\*\*)'      // bold
-      r'|(`(.+?)`)'            // inline code
-      r'|(==(.+?)==)'          // highlight
-      r'|(\*(.+?)\*)'          // italic
+      r'(\*\*(.+?)\*\*)' // bold
+      r'|(`(.+?)`)' // inline code
+      r'|(==(.+?)==)' // highlight
+      r'|(\*(.+?)\*)' // italic
       r'|(\[(.+?)\]\((.+?)\))', // link
     );
 
@@ -1072,57 +1225,70 @@ class _RichLine extends StatelessWidget {
         spans.add(TextSpan(text: text.substring(last, m.start)));
       }
       if (m.group(2) != null) {
-        spans.add(TextSpan(
-          text: m.group(2),
-          style: base.copyWith(fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-        ));
-      } else if (m.group(4) != null) {
-        spans.add(WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceHover,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: AppColors.border),
+        spans.add(
+          TextSpan(
+            text: m.group(2),
+            style: base.copyWith(
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
             ),
-            child: Text(
-              m.group(4)!,
-              style: GoogleFonts.jetBrainsMono(
-                fontSize: 13,
-                color: accent,
-                fontWeight: FontWeight.w600,
+          ),
+        );
+      } else if (m.group(4) != null) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceHover,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Text(
+                m.group(4)!,
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 13,
+                  color: accent,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ));
+        );
       } else if (m.group(6) != null) {
-        spans.add(TextSpan(
-          text: ' ${m.group(6)} ',
-          style: base.copyWith(
-            color: const Color(0xFF1A1024),
-            fontWeight: FontWeight.w700,
-            background: Paint()
-              ..color = accent.withValues(alpha: .85)
-              ..strokeCap = StrokeCap.round,
+        spans.add(
+          TextSpan(
+            text: ' ${m.group(6)} ',
+            style: base.copyWith(
+              color: const Color(0xFF1A1024),
+              fontWeight: FontWeight.w700,
+              background: Paint()
+                ..color = accent.withValues(alpha: .85)
+                ..strokeCap = StrokeCap.round,
+            ),
           ),
-        ));
+        );
       } else if (m.group(8) != null) {
-        spans.add(TextSpan(
-          text: m.group(8),
-          style: base.copyWith(fontStyle: FontStyle.italic),
-        ));
-      } else if (m.group(10) != null) {
-        spans.add(TextSpan(
-          text: m.group(10),
-          style: base.copyWith(
-            color: accent,
-            fontWeight: FontWeight.w600,
-            decoration: TextDecoration.underline,
-            decorationColor: accent.withValues(alpha: .4),
+        spans.add(
+          TextSpan(
+            text: m.group(8),
+            style: base.copyWith(fontStyle: FontStyle.italic),
           ),
-        ));
+        );
+      } else if (m.group(10) != null) {
+        spans.add(
+          TextSpan(
+            text: m.group(10),
+            style: base.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+              decorationColor: accent.withValues(alpha: .4),
+            ),
+          ),
+        );
       }
       last = m.end;
     }
@@ -1136,7 +1302,11 @@ class _RichLine extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _Callout extends StatelessWidget {
-  const _Callout({required this.kind, required this.text, required this.accent});
+  const _Callout({
+    required this.kind,
+    required this.text,
+    required this.accent,
+  });
 
   final String kind;
   final String text;
@@ -1145,8 +1315,10 @@ class _Callout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, icon, label) = switch (kind) {
-      'tip' || 'success' => (AppColors.green, Icons.lightbulb_rounded, 'Astuce'),
-      'warning' || 'caution' => (AppColors.yellow, Icons.warning_amber_rounded, 'Attention'),
+      'tip' ||
+      'success' => (AppColors.green, Icons.lightbulb_rounded, 'Astuce'),
+      'warning' ||
+      'caution' => (AppColors.yellow, Icons.warning_amber_rounded, 'Attention'),
       'danger' || 'error' => (AppColors.red, Icons.error_rounded, 'Important'),
       'info' => (AppColors.blue, Icons.info_rounded, 'Info'),
       _ => (accent, Icons.sticky_note_2_rounded, 'Note'),
@@ -1242,7 +1414,10 @@ class _MdTable extends StatelessWidget {
               children: [
                 for (final h in header)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 11,
+                    ),
                     child: Text(
                       h,
                       style: TextStyle(
@@ -1257,16 +1432,21 @@ class _MdTable extends StatelessWidget {
             for (var r = 0; r < body.length; r++)
               TableRow(
                 decoration: BoxDecoration(
-                  color: r.isOdd ? AppColors.surfaceHover.withValues(alpha: .4) : null,
+                  color: r.isOdd
+                      ? AppColors.surfaceHover.withValues(alpha: .4)
+                      : null,
                   border: Border(top: BorderSide(color: AppColors.border)),
                 ),
                 children: [
                   for (var c = 0; c < header.length; c++)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       child: Text(
                         c < body[r].length ? body[r][c] : '',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13,
                         ),
@@ -1351,15 +1531,24 @@ class _CodeBlock extends StatelessWidget {
                   },
                   borderRadius: BorderRadius.circular(7),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: .05),
                       borderRadius: BorderRadius.circular(7),
-                      border: Border.all(color: Colors.white.withValues(alpha: .08)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .08),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.content_copy_rounded, size: 12, color: Color(0xFF8B949E)),
+                        const Icon(
+                          Icons.content_copy_rounded,
+                          size: 12,
+                          color: Color(0xFF8B949E),
+                        ),
                         const SizedBox(width: 5),
                         Text(
                           'Copier',
@@ -1390,7 +1579,11 @@ class _CodeBlock extends StatelessWidget {
                         // Line number gutter
                         Container(
                           width: 44,
-                          padding: const EdgeInsets.only(right: 14, top: 2, bottom: 2),
+                          padding: const EdgeInsets.only(
+                            right: 14,
+                            top: 2,
+                            bottom: 2,
+                          ),
                           alignment: Alignment.topRight,
                           child: Text(
                             '${i + 1}',
@@ -1402,10 +1595,17 @@ class _CodeBlock extends StatelessWidget {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(right: 18, top: 2, bottom: 2),
+                          padding: const EdgeInsets.only(
+                            right: 18,
+                            top: 2,
+                            bottom: 2,
+                          ),
                           child: Text.rich(
                             TextSpan(children: _highlight(lines[i])),
-                            style: GoogleFonts.jetBrainsMono(fontSize: 12.5, height: 1.6),
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 12.5,
+                              height: 1.6,
+                            ),
                           ),
                         ),
                       ],
@@ -1420,8 +1620,11 @@ class _CodeBlock extends StatelessWidget {
     );
   }
 
-  Widget _dot(Color c) =>
-      Container(width: 11, height: 11, decoration: BoxDecoration(color: c, shape: BoxShape.circle));
+  Widget _dot(Color c) => Container(
+    width: 11,
+    height: 11,
+    decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+  );
 
   // ── Lightweight, language-agnostic syntax highlighter ──
   static const _base = Color(0xFFE6EDF3);
@@ -1432,15 +1635,77 @@ class _CodeBlock extends StatelessWidget {
   static const _func = Color(0xFFD2A8FF);
 
   static final _keywords = {
-    'const', 'final', 'var', 'let', 'function', 'func', 'def', 'class',
-    'return', 'if', 'else', 'elif', 'for', 'while', 'do', 'import', 'export',
-    'from', 'async', 'await', 'void', 'int', 'double', 'float', 'string',
-    'bool', 'true', 'false', 'null', 'none', 'new', 'this', 'self', 'super',
-    'public', 'private', 'protected', 'static', 'extends', 'implements',
-    'interface', 'enum', 'struct', 'try', 'catch', 'except', 'finally',
-    'throw', 'throws', 'switch', 'case', 'break', 'continue', 'in', 'is',
-    'as', 'not', 'and', 'or', 'lambda', 'yield', 'with', 'print', 'type',
-    'abstract', 'override', 'required', 'late', 'get', 'set', 'widget',
+    'const',
+    'final',
+    'var',
+    'let',
+    'function',
+    'func',
+    'def',
+    'class',
+    'return',
+    'if',
+    'else',
+    'elif',
+    'for',
+    'while',
+    'do',
+    'import',
+    'export',
+    'from',
+    'async',
+    'await',
+    'void',
+    'int',
+    'double',
+    'float',
+    'string',
+    'bool',
+    'true',
+    'false',
+    'null',
+    'none',
+    'new',
+    'this',
+    'self',
+    'super',
+    'public',
+    'private',
+    'protected',
+    'static',
+    'extends',
+    'implements',
+    'interface',
+    'enum',
+    'struct',
+    'try',
+    'catch',
+    'except',
+    'finally',
+    'throw',
+    'throws',
+    'switch',
+    'case',
+    'break',
+    'continue',
+    'in',
+    'is',
+    'as',
+    'not',
+    'and',
+    'or',
+    'lambda',
+    'yield',
+    'with',
+    'print',
+    'type',
+    'abstract',
+    'override',
+    'required',
+    'late',
+    'get',
+    'set',
+    'widget',
   };
 
   static List<TextSpan> _highlight(String line) {
@@ -1448,40 +1713,84 @@ class _CodeBlock extends StatelessWidget {
 
     // Whole-line comment.
     final t = line.trimLeft();
-    if (t.startsWith('//') || t.startsWith('#') || t.startsWith('*') || t.startsWith('/*')) {
-      return [TextSpan(text: line, style: const TextStyle(color: _comment, fontStyle: FontStyle.italic))];
+    if (t.startsWith('//') ||
+        t.startsWith('#') ||
+        t.startsWith('*') ||
+        t.startsWith('/*')) {
+      return [
+        TextSpan(
+          text: line,
+          style: const TextStyle(color: _comment, fontStyle: FontStyle.italic),
+        ),
+      ];
     }
 
     final spans = <TextSpan>[];
     final token = RegExp(
       r'''("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)''' // strings
-      r'|(//.*$|#.*$)'                                              // trailing comment
-      r'|(\b\d+(?:\.\d+)?\b)'                                       // numbers
-      r'|(\b[A-Za-z_]\w*\b)'                                        // identifiers
-      r'|(\s+)'                                                     // whitespace
-      r'|(.)',                                                      // any other char
+      r'|(//.*$|#.*$)' // trailing comment
+      r'|(\b\d+(?:\.\d+)?\b)' // numbers
+      r'|(\b[A-Za-z_]\w*\b)' // identifiers
+      r'|(\s+)' // whitespace
+      r'|(.)', // any other char
       multiLine: true,
     );
 
     for (final m in token.allMatches(line)) {
       final s = m.group(0)!;
       if (m.group(1) != null) {
-        spans.add(TextSpan(text: s, style: const TextStyle(color: _string)));
+        spans.add(
+          TextSpan(
+            text: s,
+            style: const TextStyle(color: _string),
+          ),
+        );
       } else if (m.group(2) != null) {
-        spans.add(TextSpan(text: s, style: const TextStyle(color: _comment, fontStyle: FontStyle.italic)));
+        spans.add(
+          TextSpan(
+            text: s,
+            style: const TextStyle(
+              color: _comment,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        );
       } else if (m.group(3) != null) {
-        spans.add(TextSpan(text: s, style: const TextStyle(color: _number)));
+        spans.add(
+          TextSpan(
+            text: s,
+            style: const TextStyle(color: _number),
+          ),
+        );
       } else if (m.group(4) != null) {
         if (_keywords.contains(s.toLowerCase())) {
-          spans.add(TextSpan(text: s, style: const TextStyle(color: _keyword, fontWeight: FontWeight.w600)));
+          spans.add(
+            TextSpan(
+              text: s,
+              style: const TextStyle(
+                color: _keyword,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
         } else {
           // Function call if followed by '(' — cheap lookahead.
           final after = line.substring(m.end).trimLeft();
           final isCall = after.startsWith('(');
-          spans.add(TextSpan(text: s, style: TextStyle(color: isCall ? _func : _base)));
+          spans.add(
+            TextSpan(
+              text: s,
+              style: TextStyle(color: isCall ? _func : _base),
+            ),
+          );
         }
       } else {
-        spans.add(TextSpan(text: s, style: const TextStyle(color: _base)));
+        spans.add(
+          TextSpan(
+            text: s,
+            style: const TextStyle(color: _base),
+          ),
+        );
       }
     }
     return spans;

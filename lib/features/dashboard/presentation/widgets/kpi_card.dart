@@ -11,16 +11,18 @@ class KpiCard extends StatelessWidget {
     required this.value,
     required this.label,
     this.sublabel,
-    this.color = AppColors.accent,
     this.progress,
     this.onTap,
+    this._color,
   });
 
   final IconData icon;
   final String value;
   final String label;
   final String? sublabel;
-  final Color color;
+  final Color? _color;
+
+  Color get color => _color ?? AppColors.accent;
 
   /// 0..1 → renders a thin progress bar under the label.
   final double? progress;

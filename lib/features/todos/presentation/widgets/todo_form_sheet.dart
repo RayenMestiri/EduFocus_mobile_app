@@ -8,10 +8,10 @@ import '../../../subjects/domain/subject.dart';
 import '../../data/todos_repository.dart';
 import '../../domain/todo.dart';
 
-const kPriorities = [
+List<(String, String, Color)> get kPriorities => [
   ('low', 'Basse', AppColors.blue),
   ('medium', 'Moyenne', AppColors.yellow),
-  ('high', 'Haute', Color(0xFFF97316)),
+  ('high', 'Haute', const Color(0xFFF97316)),
   ('urgent', 'Urgente', AppColors.red),
 ];
 
@@ -97,7 +97,7 @@ class _TodoFormSheetState extends ConsumerState<_TodoFormSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(top: BorderSide(color: AppColors.borderBright)),
@@ -134,7 +134,7 @@ class _TodoFormSheetState extends ConsumerState<_TodoFormSheet> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     _error!,
-                    style: const TextStyle(color: AppColors.red, fontSize: 13),
+                    style: TextStyle(color: AppColors.red, fontSize: 13),
                   ),
                 ),
               TextField(

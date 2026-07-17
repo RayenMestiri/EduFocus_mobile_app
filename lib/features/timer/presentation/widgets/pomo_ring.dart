@@ -42,8 +42,8 @@ class _RingPainter extends CustomPainter {
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     final colors = isBreak
-        ? const [AppColors.green, Color(0xFF059669)]
-        : const [AppColors.accentBright, AppColors.indigo];
+        ? [AppColors.green, Color(0xFF059669)]
+        : [AppColors.accentBright, AppColors.indigo];
 
     // Track
     canvas.drawCircle(

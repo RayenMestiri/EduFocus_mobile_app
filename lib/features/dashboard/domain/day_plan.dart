@@ -73,7 +73,10 @@ class DayPlanSubject {
     if (subObject is Map<String, dynamic>) {
       subId = subObject['_id'] as String? ?? subObject['id'] as String? ?? '';
       subName = subObject['name'] as String? ?? 'Matière';
-      subColor = subObject['colorHex'] as String? ?? subObject['color'] as String? ?? '#6366f1';
+      subColor =
+          subObject['colorHex'] as String? ??
+          subObject['color'] as String? ??
+          '#6366f1';
       subIcon = subObject['icon'] as String? ?? 'book';
     } else if (subObject is String) {
       subId = subObject;
@@ -160,6 +163,9 @@ class DayPlan {
   }
 
   int get totalGoalMinutes => subjects.fold(0, (sum, s) => sum + s.goalMinutes);
-  int get totalStudiedMinutes => subjects.fold(0, (sum, s) => sum + s.studiedMinutes);
-  double get progress => totalGoalMinutes > 0 ? (totalStudiedMinutes / totalGoalMinutes).clamp(0.0, 1.0) : 0.0;
+  int get totalStudiedMinutes =>
+      subjects.fold(0, (sum, s) => sum + s.studiedMinutes);
+  double get progress => totalGoalMinutes > 0
+      ? (totalStudiedMinutes / totalGoalMinutes).clamp(0.0, 1.0)
+      : 0.0;
 }

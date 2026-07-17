@@ -26,7 +26,7 @@ class SrsEngine {
   /// - 3 = Easy (Facile)
   static Flashcard rateCard(Flashcard card, int rating) {
     final now = DateTime.now();
-    
+
     String state = card.state;
     int repetitions = card.repetitions;
     int interval = card.interval;
@@ -209,7 +209,10 @@ class SrsEngine {
   }
 
   /// Build review queue matching Angular logic (due/overdue + limited new cards)
-  static List<Flashcard> buildReviewQueue(List<Flashcard> cards, {int newCardsPerDay = 20}) {
+  static List<Flashcard> buildReviewQueue(
+    List<Flashcard> cards, {
+    int newCardsPerDay = 20,
+  }) {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
 
@@ -244,12 +247,7 @@ class SrsEngine {
     final limitedNew = newCards.take(newCardsPerDay).toList();
 
     // Combined queue: Overdue first, then Due Today, then Learning, then New
-    return [
-      ...overdue,
-      ...dueToday,
-      ...learning,
-      ...limitedNew,
-    ];
+    return [...overdue, ...dueToday, ...learning, ...limitedNew];
   }
 }
 

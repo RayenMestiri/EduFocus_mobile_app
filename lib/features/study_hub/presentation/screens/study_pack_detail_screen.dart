@@ -15,10 +15,12 @@ class StudyPackDetailScreen extends ConsumerStatefulWidget {
   final String packId;
 
   @override
-  ConsumerState<StudyPackDetailScreen> createState() => _StudyPackDetailScreenState();
+  ConsumerState<StudyPackDetailScreen> createState() =>
+      _StudyPackDetailScreenState();
 }
 
-class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> with SingleTickerProviderStateMixin {
+class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _selectMode = false;
   final Set<String> _selectedIds = {};
@@ -57,11 +59,15 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
       ref.invalidate(studyPackProvider(pack.id));
       if (mounted) {
         if (newStatus) {
-          await Clipboard.setData(ClipboardData(text: 'http://localhost:4200/study-hub/shared/${pack.id}'));
+          await Clipboard.setData(
+            ClipboardData(
+              text: 'http://localhost:4200/study-hub/shared/${pack.id}',
+            ),
+          );
           _showShareDialog(pack.id);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('🔒 Pack d\'étude rendu privé.'),
               backgroundColor: AppColors.green,
               behavior: SnackBarBehavior.floating,
@@ -93,7 +99,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
         backgroundColor: AppColors.surfaceGlass,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: AppColors.border),
         ),
         title: Row(
           children: [
@@ -104,7 +110,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                 color: AppColors.green.withValues(alpha: .15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.share_rounded,
                 size: 18,
                 color: AppColors.green,
@@ -127,7 +133,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
+            Text(
               'Le pack d\'étude est désormais public. Partagez-le avec les liens et codes ci-dessous :',
               style: TextStyle(
                 color: AppColors.textSecondary,
@@ -172,7 +178,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: shareLink));
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Lien web copié !'),
                           backgroundColor: AppColors.green,
                           behavior: SnackBarBehavior.floating,
@@ -185,7 +191,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                         color: AppColors.accent.withValues(alpha: .15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.content_copy_rounded,
                         size: 14,
                         color: AppColors.accentBright,
@@ -233,7 +239,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: mobileCode));
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Code mobile copié !'),
                           backgroundColor: AppColors.green,
                           behavior: SnackBarBehavior.floating,
@@ -246,7 +252,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                         color: AppColors.accent.withValues(alpha: .15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.content_copy_rounded,
                         size: 14,
                         color: AppColors.accentBright,
@@ -257,9 +263,13 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
               ),
             ),
             const SizedBox(height: 14),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle_outline_rounded, color: AppColors.green, size: 14),
+                Icon(
+                  Icons.check_circle_outline_rounded,
+                  color: AppColors.green,
+                  size: 14,
+                ),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -278,10 +288,11 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
+            style: TextButton.styleFrom(foregroundColor: AppColors.textPrimary),
+            child: const Text(
+              'Fermer',
+              style: TextStyle(fontWeight: FontWeight.w800),
             ),
-            child: const Text('Fermer', style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -295,23 +306,40 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
       final activeTab = _tabController.index;
 
       if (activeTab == 0) {
-        final updated = pack.notes.where((n) => !_selectedIds.contains(n.id)).map((n) => n.toJson()).toList();
+        final updated = pack.notes
+            .where((n) => !_selectedIds.contains(n.id))
+            .map((n) => n.toJson())
+            .toList();
         updatedPayload['notes'] = updated;
       } else if (activeTab == 1) {
-        final updated = pack.flashcards.where((f) => !_selectedIds.contains(f.id)).map((f) => f.toJson()).toList();
+        final updated = pack.flashcards
+            .where((f) => !_selectedIds.contains(f.id))
+            .map((f) => f.toJson())
+            .toList();
         updatedPayload['flashcards'] = updated;
       } else if (activeTab == 2) {
-        final updated = pack.qcm.where((q) => !_selectedIds.contains(q.id)).map((q) => q.toJson()).toList();
+        final updated = pack.qcm
+            .where((q) => !_selectedIds.contains(q.id))
+            .map((q) => q.toJson())
+            .toList();
         updatedPayload['qcm'] = updated;
       } else if (activeTab == 3) {
-        final updated = pack.cheatsheets.where((c) => !_selectedIds.contains(c.id)).map((c) => c.toJson()).toList();
+        final updated = pack.cheatsheets
+            .where((c) => !_selectedIds.contains(c.id))
+            .map((c) => c.toJson())
+            .toList();
         updatedPayload['cheatsheets'] = updated;
       } else if (activeTab == 4) {
-        final updated = pack.exercises.where((e) => !_selectedIds.contains(e.id)).map((e) => e.toJson()).toList();
+        final updated = pack.exercises
+            .where((e) => !_selectedIds.contains(e.id))
+            .map((e) => e.toJson())
+            .toList();
         updatedPayload['exercises'] = updated;
       }
 
-      await ref.read(studyPacksRepositoryProvider).update(pack.id, updatedPayload);
+      await ref
+          .read(studyPacksRepositoryProvider)
+          .update(pack.id, updatedPayload);
       ref.invalidate(studyPackProvider(pack.id));
       ref.invalidate(studyPacksProvider);
 
@@ -322,7 +350,7 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('🗑️ Éléments supprimés avec succès !'),
             backgroundColor: AppColors.green,
             behavior: SnackBarBehavior.floating,
@@ -354,7 +382,9 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
           onImport: (type, jsonString) async {
             try {
               final parsed = jsonDecode(jsonString);
-              if (parsed is! List) throw const FormatException('Le JSON doit être un tableau.');
+              if (parsed is! List) {
+                throw const FormatException('Le JSON doit être un tableau.');
+              }
 
               final updatedPayload = <String, dynamic>{};
               if (type == 'notes') {
@@ -366,7 +396,10 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                     tags: List<String>.from(item['tags'] ?? []),
                   );
                 }).toList();
-                final combined = [...pack.notes, ...newNotes].map((n) => n.toJson()).toList();
+                final combined = [
+                  ...pack.notes,
+                  ...newNotes,
+                ].map((n) => n.toJson()).toList();
                 updatedPayload['notes'] = combined;
               } else if (type == 'flashcards') {
                 final newCards = parsed.map((item) {
@@ -377,7 +410,10 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                     code: item['code'] as String?,
                   );
                 }).toList();
-                final combined = [...pack.flashcards, ...newCards].map((f) => f.toJson()).toList();
+                final combined = [
+                  ...pack.flashcards,
+                  ...newCards,
+                ].map((f) => f.toJson()).toList();
                 updatedPayload['flashcards'] = combined;
               } else if (type == 'qcm') {
                 final newQcms = parsed.map((item) {
@@ -391,18 +427,23 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                     topic: item['topic'] as String? ?? 'Importé',
                   );
                 }).toList();
-                final combined = [...pack.qcm, ...newQcms].map((q) => q.toJson()).toList();
+                final combined = [
+                  ...pack.qcm,
+                  ...newQcms,
+                ].map((q) => q.toJson()).toList();
                 updatedPayload['qcm'] = combined;
               }
 
               setState(() => _isSaving = true);
-              await ref.read(studyPacksRepositoryProvider).update(pack.id, updatedPayload);
+              await ref
+                  .read(studyPacksRepositoryProvider)
+                  .update(pack.id, updatedPayload);
               ref.invalidate(studyPackProvider(pack.id));
               ref.invalidate(studyPacksProvider);
 
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('📥 Données importées avec succès !'),
                     backgroundColor: AppColors.green,
                     behavior: SnackBarBehavior.floating,
@@ -458,43 +499,52 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
           );
         } else if (activeTab == 2) {
           return _QcmFormSheet(
-            onSave: (question, type, options, correctAnswer, explanation, topic) => _saveItem(pack, 'qcm', {
-              'id': _generateUuid(),
-              'question': question,
-              'type': type,
-              'options': options,
-              'correctAnswer': correctAnswer,
-              'explanation': explanation,
-              'topic': topic,
-            }),
+            onSave:
+                (question, type, options, correctAnswer, explanation, topic) =>
+                    _saveItem(pack, 'qcm', {
+                      'id': _generateUuid(),
+                      'question': question,
+                      'type': type,
+                      'options': options,
+                      'correctAnswer': correctAnswer,
+                      'explanation': explanation,
+                      'topic': topic,
+                    }),
           );
         } else if (activeTab == 3) {
           return _CheatsheetFormSheet(
-            onSave: (title, category, items, codeSample) => _saveItem(pack, 'cheatsheets', {
-              'id': _generateUuid(),
-              'title': title,
-              'category': category,
-              'items': items,
-              'codeSample': codeSample,
-            }),
+            onSave: (title, category, items, codeSample) =>
+                _saveItem(pack, 'cheatsheets', {
+                  'id': _generateUuid(),
+                  'title': title,
+                  'category': category,
+                  'items': items,
+                  'codeSample': codeSample,
+                }),
           );
         } else {
           return _ExerciseFormSheet(
-            onSave: (title, description, task, correctSolution, solutionNote) => _saveItem(pack, 'exercises', {
-              'id': _generateUuid(),
-              'title': title,
-              'description': description,
-              'task': task,
-              'correctSolution': correctSolution,
-              'solutionNote': solutionNote,
-            }),
+            onSave: (title, description, task, correctSolution, solutionNote) =>
+                _saveItem(pack, 'exercises', {
+                  'id': _generateUuid(),
+                  'title': title,
+                  'description': description,
+                  'task': task,
+                  'correctSolution': correctSolution,
+                  'solutionNote': solutionNote,
+                }),
           );
         }
       },
     );
   }
 
-  Future<void> _saveItem(StudyPack pack, String arrayKey, Map<String, dynamic> itemJson, {String? editId}) async {
+  Future<void> _saveItem(
+    StudyPack pack,
+    String arrayKey,
+    Map<String, dynamic> itemJson, {
+    String? editId,
+  }) async {
     setState(() => _isSaving = true);
     try {
       final updatedPayload = <String, dynamic>{};
@@ -546,13 +596,15 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
         updatedPayload['exercises'] = current;
       }
 
-      await ref.read(studyPacksRepositoryProvider).update(pack.id, updatedPayload);
+      await ref
+          .read(studyPacksRepositoryProvider)
+          .update(pack.id, updatedPayload);
       ref.invalidate(studyPackProvider(pack.id));
       ref.invalidate(studyPacksProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('💾 Modifications enregistrées avec succès !'),
             backgroundColor: AppColors.green,
             behavior: SnackBarBehavior.floating,
@@ -583,92 +635,71 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
         if (item is Note) {
           return _NoteFormSheet(
             note: item,
-            onSave: (title, content, tags, color) => _saveItem(
-              pack,
-              'notes',
-              {
-                'id': item.id,
-                'title': title,
-                'content': content,
-                'tags': tags,
-                'isPinned': item.isPinned,
-                'color': color,
-              },
-              editId: item.id,
-            ),
+            onSave: (title, content, tags, color) => _saveItem(pack, 'notes', {
+              'id': item.id,
+              'title': title,
+              'content': content,
+              'tags': tags,
+              'isPinned': item.isPinned,
+              'color': color,
+            }, editId: item.id),
           );
         } else if (item is Flashcard) {
           return _FlashcardFormSheet(
             card: item,
-            onSave: (front, back, code) => _saveItem(
-              pack,
-              'flashcards',
-              {
-                'id': item.id,
-                'front': front,
-                'back': back,
-                'code': code,
-                'state': item.state,
-                'repetitions': item.repetitions,
-                'interval': item.interval,
-                'easeFactor': item.easeFactor,
-                'dueDate': item.dueDate?.toIso8601String(),
-                'lastReviewed': item.lastReviewed?.toIso8601String(),
-                'lapses': item.lapses,
-              },
-              editId: item.id,
-            ),
+            onSave: (front, back, code) => _saveItem(pack, 'flashcards', {
+              'id': item.id,
+              'front': front,
+              'back': back,
+              'code': code,
+              'state': item.state,
+              'repetitions': item.repetitions,
+              'interval': item.interval,
+              'easeFactor': item.easeFactor,
+              'dueDate': item.dueDate?.toIso8601String(),
+              'lastReviewed': item.lastReviewed?.toIso8601String(),
+              'lapses': item.lapses,
+            }, editId: item.id),
           );
         } else if (item is QCM) {
           return _QcmFormSheet(
             qcm: item,
-            onSave: (question, type, options, correctAnswer, explanation, topic) => _saveItem(
-              pack,
-              'qcm',
-              {
-                'id': item.id,
-                'question': question,
-                'type': type,
-                'options': options,
-                'correctAnswer': correctAnswer,
-                'explanation': explanation,
-                'topic': topic,
-              },
-              editId: item.id,
-            ),
+            onSave:
+                (question, type, options, correctAnswer, explanation, topic) =>
+                    _saveItem(pack, 'qcm', {
+                      'id': item.id,
+                      'question': question,
+                      'type': type,
+                      'options': options,
+                      'correctAnswer': correctAnswer,
+                      'explanation': explanation,
+                      'topic': topic,
+                    }, editId: item.id),
           );
         } else if (item is Cheatsheet) {
           return _CheatsheetFormSheet(
             sheet: item,
-            onSave: (title, category, items, codeSample) => _saveItem(
-              pack,
-              'cheatsheets',
-              {
-                'id': item.id,
-                'title': title,
-                'category': category,
-                'items': items,
-                'codeSample': codeSample,
-              },
-              editId: item.id,
-            ),
+            onSave: (title, category, items, codeSample) =>
+                _saveItem(pack, 'cheatsheets', {
+                  'id': item.id,
+                  'title': title,
+                  'category': category,
+                  'items': items,
+                  'codeSample': codeSample,
+                }, editId: item.id),
           );
         } else if (item is Exercise) {
           return _ExerciseFormSheet(
             exercise: item,
-            onSave: (title, description, task, correctSolution, solutionNote) => _saveItem(
-              pack,
-              'exercises',
-              {
-                'id': item.id,
-                'title': title,
-                'description': description,
-                'task': task,
-                'correctSolution': correctSolution,
-                'solutionNote': solutionNote,
-              },
-              editId: item.id,
-            ),
+            onSave: (title, description, task, correctSolution, solutionNote) =>
+                _saveItem(pack, 'exercises', {
+                  'id': item.id,
+                  'title': title,
+                  'description': description,
+                  'task': task,
+                  'correctSolution': correctSolution,
+                  'solutionNote': solutionNote,
+                }, editId: item.id),
           );
         }
         return const SizedBox.shrink();
@@ -687,7 +718,9 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Erreur')),
-        body: Center(child: Text(e.toString(), style: const TextStyle(color: AppColors.red))),
+        body: Center(
+          child: Text(e.toString(), style: TextStyle(color: AppColors.red)),
+        ),
       ),
       data: (pack) {
         return Scaffold(
@@ -703,11 +736,19 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                   context.pop();
                 }
               },
-              icon: Icon(_selectMode ? Icons.close_rounded : Icons.arrow_back_ios_new_rounded, size: 18),
+              icon: Icon(
+                _selectMode
+                    ? Icons.close_rounded
+                    : Icons.arrow_back_ios_new_rounded,
+                size: 18,
+              ),
             ),
             title: Text(
               _selectMode ? '${_selectedIds.length} sélectionnés' : pack.title,
-              style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5),
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
@@ -716,8 +757,12 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                 IconButton(
                   onPressed: () => _togglePublic(pack),
                   icon: Icon(
-                    pack.isPublic ? Icons.public_rounded : Icons.public_off_rounded,
-                    color: pack.isPublic ? AppColors.green : AppColors.textMuted,
+                    pack.isPublic
+                        ? Icons.public_rounded
+                        : Icons.public_off_rounded,
+                    color: pack.isPublic
+                        ? AppColors.green
+                        : AppColors.textMuted,
                   ),
                   tooltip: pack.isPublic ? 'Rendre privé' : 'Publier le pack',
                 ),
@@ -735,20 +780,27 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                 ),
               ] else ...[
                 IconButton(
-                  onPressed: _selectedIds.isEmpty ? null : () => _deleteSelectedItems(pack),
-                  icon: const Icon(Icons.delete_rounded, color: AppColors.red),
+                  onPressed: _selectedIds.isEmpty
+                      ? null
+                      : () => _deleteSelectedItems(pack),
+                  icon: Icon(Icons.delete_rounded, color: AppColors.red),
                   tooltip: 'Supprimer la sélection',
                 ),
-              ]
+              ],
             ],
           ),
           body: RefreshIndicator(
-            onRefresh: () => ref.refresh(studyPackProvider(widget.packId).future),
+            onRefresh: () =>
+                ref.refresh(studyPackProvider(widget.packId).future),
             child: DefaultTabController(
               length: 5,
               child: Column(
                 children: [
-                  if (_isSaving) const LinearProgressIndicator(minHeight: 2, color: AppColors.accent),
+                  if (_isSaving)
+                    LinearProgressIndicator(
+                      minHeight: 2,
+                      color: AppColors.accent,
+                    ),
                   // ── Sleek Compact Header Card ──
                   _CompactHeroCard(pack: pack),
 
@@ -759,17 +811,63 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
                     tabAlignment: TabAlignment.start,
                     indicatorColor: AppColors.accent,
                     indicatorWeight: 2.5,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
-                    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
                     labelColor: AppColors.accentText,
                     unselectedLabelColor: AppColors.textMuted,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     tabs: [
-                      Tab(child: Row(children: [const Text('📝 Notes'), const SizedBox(width: 4), _CountBadge(count: pack.noteCount)])),
-                      Tab(child: Row(children: [const Text('🎴 Cards'), const SizedBox(width: 4), _CountBadge(count: pack.cardCount)])),
-                      Tab(child: Row(children: [const Text('❓ QCM'), const SizedBox(width: 4), _CountBadge(count: pack.qcmCount)])),
-                      Tab(child: Row(children: [const Text('📜 Cheat'), const SizedBox(width: 4), _CountBadge(count: pack.cheatsheetCount)])),
-                      Tab(child: Row(children: [const Text('💻 Exos'), const SizedBox(width: 4), _CountBadge(count: pack.exerciseCount)])),
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Text('📝 Notes'),
+                            const SizedBox(width: 4),
+                            _CountBadge(count: pack.noteCount),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Text('🎴 Cards'),
+                            const SizedBox(width: 4),
+                            _CountBadge(count: pack.cardCount),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Text('❓ QCM'),
+                            const SizedBox(width: 4),
+                            _CountBadge(count: pack.qcmCount),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Text('📜 Cheat'),
+                            const SizedBox(width: 4),
+                            _CountBadge(count: pack.cheatsheetCount),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Text('💻 Exos'),
+                            const SizedBox(width: 4),
+                            _CountBadge(count: pack.exerciseCount),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
 
@@ -855,8 +953,14 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen> w
               : FloatingActionButton(
                   onPressed: () => _showAddItemSheet(pack),
                   backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
         );
       },
@@ -877,7 +981,9 @@ class _CompactHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final mastered = pack.countByState('mastered');
-    final progress = pack.cardCount > 0 ? (mastered / pack.cardCount).clamp(0.0, 1.0) : 0.0;
+    final progress = pack.cardCount > 0
+        ? (mastered / pack.cardCount).clamp(0.0, 1.0)
+        : 0.0;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -903,7 +1009,10 @@ class _CompactHeroCard extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: .15),
                         borderRadius: BorderRadius.circular(6),
@@ -920,7 +1029,14 @@ class _CompactHeroCard extends StatelessWidget {
                     ),
                     if (pack.isPublic) ...[
                       const SizedBox(width: 8),
-                      const Text('🌍 PUBLIC', style: TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.bold)),
+                      const Text(
+                        '🌍 PUBLIC',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -936,11 +1052,16 @@ class _CompactHeroCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (pack.description != null && pack.description!.isNotEmpty) ...[
+                if (pack.description != null &&
+                    pack.description!.isNotEmpty) ...[
                   const SizedBox(height: 3),
                   Text(
                     pack.description!,
-                    style: const TextStyle(color: Colors.white60, fontSize: 10, height: 1.2),
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 10,
+                      height: 1.2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -948,15 +1069,30 @@ class _CompactHeroCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _MiniStat(icon: Icons.description_rounded, value: '${pack.noteCount}'),
+                    _MiniStat(
+                      icon: Icons.description_rounded,
+                      value: '${pack.noteCount}',
+                    ),
                     const SizedBox(width: 8),
-                    _MiniStat(icon: Icons.style_rounded, value: '${pack.cardCount}'),
+                    _MiniStat(
+                      icon: Icons.style_rounded,
+                      value: '${pack.cardCount}',
+                    ),
                     const SizedBox(width: 8),
-                    _MiniStat(icon: Icons.quiz_rounded, value: '${pack.qcmCount}'),
+                    _MiniStat(
+                      icon: Icons.quiz_rounded,
+                      value: '${pack.qcmCount}',
+                    ),
                     const SizedBox(width: 8),
-                    _MiniStat(icon: Icons.article_rounded, value: '${pack.cheatsheetCount}'),
+                    _MiniStat(
+                      icon: Icons.article_rounded,
+                      value: '${pack.cheatsheetCount}',
+                    ),
                     const SizedBox(width: 8),
-                    _MiniStat(icon: Icons.code_rounded, value: '${pack.exerciseCount}'),
+                    _MiniStat(
+                      icon: Icons.code_rounded,
+                      value: '${pack.exerciseCount}',
+                    ),
                   ],
                 ),
               ],
@@ -984,7 +1120,9 @@ class _CompactHeroCard extends StatelessWidget {
                       value: progress,
                       strokeWidth: 4,
                       backgroundColor: Colors.white.withValues(alpha: .15),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
                     ),
                   ),
                   Text(
@@ -1050,7 +1188,7 @@ class _CountBadge extends StatelessWidget {
       ),
       child: Text(
         '$count',
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.accentBright,
           fontSize: 9.5,
           fontWeight: FontWeight.w800,
@@ -1086,7 +1224,9 @@ class _EmptyState extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.accent.withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.accent.withValues(alpha: .15)),
+                border: Border.all(
+                  color: AppColors.accent.withValues(alpha: .15),
+                ),
               ),
               child: Icon(icon, color: AppColors.textMuted, size: 24),
             ),
@@ -1163,7 +1303,9 @@ class _NotesTabState extends State<_NotesTab> {
     if (_selectedFilter == 'Important') {
       filteredNotes = filteredNotes.where((n) => n.isPinned).toList();
     } else if (_selectedFilter != 'all') {
-      filteredNotes = filteredNotes.where((n) => n.tags.contains(_selectedFilter)).toList();
+      filteredNotes = filteredNotes
+          .where((n) => n.tags.contains(_selectedFilter))
+          .toList();
     }
 
     final sorted = [...filteredNotes]
@@ -1191,7 +1333,11 @@ class _NotesTabState extends State<_NotesTab> {
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
                     label: Text(
-                      filter == 'all' ? 'Toutes' : (filter == 'Important' ? '📌 Important' : '#$filter'),
+                      filter == 'all'
+                          ? 'Toutes'
+                          : (filter == 'Important'
+                                ? '📌 Important'
+                                : '#$filter'),
                       style: TextStyle(
                         color: active ? Colors.white : AppColors.textSecondary,
                         fontWeight: FontWeight.w800,
@@ -1203,7 +1349,9 @@ class _NotesTabState extends State<_NotesTab> {
                     backgroundColor: AppColors.surfaceGlass,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: active ? AppColors.accent : AppColors.border),
+                      side: BorderSide(
+                        color: active ? AppColors.accent : AppColors.border,
+                      ),
                     ),
                     onSelected: (selected) {
                       if (selected) {
@@ -1215,7 +1363,7 @@ class _NotesTabState extends State<_NotesTab> {
               },
             ),
           ),
-        
+
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
@@ -1267,7 +1415,9 @@ class _NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final preview = note.content.length > 100 ? '${note.content.substring(0, 100)}…' : note.content;
+    final preview = note.content.length > 100
+        ? '${note.content.substring(0, 100)}…'
+        : note.content;
     final accentColor = _parseHexColor(note.color);
 
     return Container(
@@ -1317,7 +1467,7 @@ class _NoteCard extends StatelessWidget {
                     children: [
                       Text(
                         note.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -1329,7 +1479,7 @@ class _NoteCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         preview.isEmpty ? 'Aucun contenu rédigé' : preview,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 11.5,
                           height: 1.45,
@@ -1349,16 +1499,24 @@ class _NoteCard extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: onEdit,
-                        icon: const Icon(Icons.mode_edit_outline_rounded, size: 16, color: AppColors.textSecondary),
+                        icon: Icon(
+                          Icons.mode_edit_outline_rounded,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
                       if (note.isPinned) ...[
                         const SizedBox(height: 8),
-                        const Icon(Icons.push_pin_rounded, size: 14, color: AppColors.yellow),
+                        Icon(
+                          Icons.push_pin_rounded,
+                          size: 14,
+                          color: AppColors.yellow,
+                        ),
                       ],
                     ],
-                  )
+                  ),
               ],
             ),
           ),
@@ -1406,18 +1564,32 @@ class _FlashcardsTab extends StatelessWidget {
                 backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 elevation: 4,
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 20),
               label: Text(
-                due > 0 ? 'Réviser ($due cartes dues)' : 'Réviser les flashcards',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                due > 0
+                    ? 'Réviser ($due cartes dues)'
+                    : 'Réviser les flashcards',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 18),
-          const Text('Toutes les Flashcards', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppColors.textPrimary)),
+          Text(
+            'Toutes les Flashcards',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 8),
         ],
 
@@ -1474,7 +1646,13 @@ class _FlashcardSummaryBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Distribution SRS', style: text.bodySmall?.copyWith(fontWeight: FontWeight.w900, fontSize: 11)),
+          Text(
+            'Distribution SRS',
+            style: text.bodySmall?.copyWith(
+              fontWeight: FontWeight.w900,
+              fontSize: 11,
+            ),
+          ),
           const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
@@ -1482,10 +1660,70 @@ class _FlashcardSummaryBlock extends StatelessWidget {
               height: 20,
               child: Row(
                 children: [
-                  if (newCount > 0) Expanded(flex: newCount, child: Container(color: AppColors.blue, alignment: Alignment.center, child: Text('$newCount', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)))),
-                  if (learningCount > 0) Expanded(flex: learningCount, child: Container(color: AppColors.yellow, alignment: Alignment.center, child: Text('$learningCount', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)))),
-                  if (reviewCount > 0) Expanded(flex: reviewCount, child: Container(color: AppColors.accent, alignment: Alignment.center, child: Text('$reviewCount', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)))),
-                  if (masteredCount > 0) Expanded(flex: masteredCount, child: Container(color: AppColors.green, alignment: Alignment.center, child: Text('$masteredCount', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)))),
+                  if (newCount > 0)
+                    Expanded(
+                      flex: newCount,
+                      child: Container(
+                        color: AppColors.blue,
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$newCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (learningCount > 0)
+                    Expanded(
+                      flex: learningCount,
+                      child: Container(
+                        color: AppColors.yellow,
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$learningCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (reviewCount > 0)
+                    Expanded(
+                      flex: reviewCount,
+                      child: Container(
+                        color: AppColors.accent,
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$reviewCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (masteredCount > 0)
+                    Expanded(
+                      flex: masteredCount,
+                      child: Container(
+                        color: AppColors.green,
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$masteredCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -1497,7 +1735,11 @@ class _FlashcardSummaryBlock extends StatelessWidget {
 }
 
 class _FlashcardTile extends StatelessWidget {
-  const _FlashcardTile({required this.card, required this.selectMode, required this.onEdit});
+  const _FlashcardTile({
+    required this.card,
+    required this.selectMode,
+    required this.onEdit,
+  });
   final Flashcard card;
   final bool selectMode;
   final VoidCallback onEdit;
@@ -1522,7 +1764,10 @@ class _FlashcardTile extends StatelessWidget {
           Container(
             width: 8,
             height: 32,
-            decoration: BoxDecoration(color: stateColor, borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(
+              color: stateColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1531,13 +1776,19 @@ class _FlashcardTile extends StatelessWidget {
               children: [
                 Text(
                   card.front,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   card.back,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1547,7 +1798,11 @@ class _FlashcardTile extends StatelessWidget {
           if (!selectMode)
             IconButton(
               onPressed: onEdit,
-              icon: const Icon(Icons.mode_edit_outline_rounded, size: 16, color: AppColors.accentText),
+              icon: Icon(
+                Icons.mode_edit_outline_rounded,
+                size: 16,
+                color: AppColors.accentText,
+              ),
             ),
         ],
       ),
@@ -1596,10 +1851,18 @@ class _QcmTab extends StatelessWidget {
                 backgroundColor: AppColors.cyan,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 20),
-              label: Text('Lancer le Quiz (${pack.qcm.length} questions)', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              label: Text(
+                'Lancer le Quiz (${pack.qcm.length} questions)',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -1626,15 +1889,31 @@ class _QcmTab extends StatelessWidget {
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: BoxDecoration(color: AppColors.cyan.withValues(alpha: .1), borderRadius: BorderRadius.circular(6)),
-                        child: Text(q.topic ?? 'Général', style: const TextStyle(color: AppColors.cyan, fontSize: 8, fontWeight: FontWeight.bold)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.cyan.withValues(alpha: .1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          q.topic ?? 'Général',
+                          style: TextStyle(
+                            color: AppColors.cyan,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           q.question,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1642,7 +1921,11 @@ class _QcmTab extends StatelessWidget {
                       if (!selectMode)
                         IconButton(
                           onPressed: () => onEdit(q),
-                          icon: const Icon(Icons.mode_edit_outline_rounded, size: 16, color: AppColors.accentText),
+                          icon: Icon(
+                            Icons.mode_edit_outline_rounded,
+                            size: 16,
+                            color: AppColors.accentText,
+                          ),
                         ),
                     ],
                   ),
@@ -1665,7 +1948,10 @@ Color _getCategoryColor(String cat) {
   if (c.contains('math') || c.contains('calcul') || c.contains('formule')) {
     return const Color(0xFF3B82F6); // Vibrant Blue
   }
-  if (c.contains('code') || c.contains('sql') || c.contains('dev') || c.contains('prog')) {
+  if (c.contains('code') ||
+      c.contains('sql') ||
+      c.contains('dev') ||
+      c.contains('prog')) {
     return const Color(0xFF8B5CF6); // Vibrant Purple
   }
   if (c.contains('science') || c.contains('physique') || c.contains('chimie')) {
@@ -1799,7 +2085,7 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                       children: [
                         Text(
                           widget.sheet.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.bold,
                             fontSize: 13.5,
@@ -1809,11 +2095,16 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                         const SizedBox(height: 5),
                         // Category Pill Badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2.5,
+                          ),
                           decoration: BoxDecoration(
                             color: catColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: catColor.withValues(alpha: 0.25)),
+                            border: Border.all(
+                              color: catColor.withValues(alpha: 0.25),
+                            ),
                           ),
                           child: Text(
                             widget.sheet.category.toUpperCase(),
@@ -1837,7 +2128,11 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                       if (!widget.selectMode)
                         IconButton(
                           onPressed: widget.onEdit,
-                          icon: const Icon(Icons.mode_edit_outline_rounded, size: 16, color: AppColors.textSecondary),
+                          icon: Icon(
+                            Icons.mode_edit_outline_rounded,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                          ),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
@@ -1845,7 +2140,7 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                       AnimatedRotation(
                         turns: _expanded ? 0.5 : 0,
                         duration: const Duration(milliseconds: 200),
-                        child: const Icon(
+                        child: Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: AppColors.textMuted,
                           size: 20,
@@ -1866,9 +2161,9 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Divider(color: AppColors.border, height: 1),
+                  Divider(color: AppColors.border, height: 1),
                   const SizedBox(height: 14),
-                  
+
                   // Concept Key-Value List styled as glowing cards
                   ListView.builder(
                     shrinkWrap: true,
@@ -1878,9 +2173,14 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                       final item = widget.sheet.items[i];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceSecondary.withValues(alpha: .5),
+                          color: AppColors.surfaceSecondary.withValues(
+                            alpha: .5,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.border),
                         ),
@@ -1906,7 +2206,7 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                               flex: 7,
                               child: Text(
                                 item.value,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 11.5,
                                   height: 1.4,
@@ -1921,7 +2221,9 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
                 ],
               ),
             ),
-            crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 220),
           ),
         ],
@@ -1971,10 +2273,18 @@ class _ExercisesTab extends StatelessWidget {
                 backgroundColor: AppColors.green,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 20),
-              label: Text('Commencer les exercices (${pack.exercises.length})', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              label: Text(
+                'Commencer les exercices (${pack.exercises.length})',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -1993,30 +2303,61 @@ class _ExercisesTab extends StatelessWidget {
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppColors.surfaceGlass, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceGlass,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
                   child: Row(
                     children: [
                       Container(
                         width: 26,
                         height: 26,
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(color: AppColors.green.withValues(alpha: .1), borderRadius: BorderRadius.circular(6)),
-                        child: const Icon(Icons.code_rounded, color: AppColors.green, size: 14),
+                        decoration: BoxDecoration(
+                          color: AppColors.green.withValues(alpha: .1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.code_rounded,
+                          color: AppColors.green,
+                          size: 14,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(ex.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            Text(ex.description, style: const TextStyle(fontSize: 10, color: AppColors.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text(
+                              ex.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              ex.description,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textMuted,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       ),
                       if (!selectMode)
                         IconButton(
                           onPressed: () => onEdit(ex),
-                          icon: const Icon(Icons.mode_edit_outline_rounded, size: 16, color: AppColors.accentText),
+                          icon: Icon(
+                            Icons.mode_edit_outline_rounded,
+                            size: 16,
+                            color: AppColors.accentText,
+                          ),
                         ),
                     ],
                   ),
@@ -2037,7 +2378,13 @@ class _ExercisesTab extends StatelessWidget {
 class _NoteFormSheet extends StatefulWidget {
   const _NoteFormSheet({this.note, required this.onSave});
   final Note? note;
-  final void Function(String title, String content, List<String> tags, String color) onSave;
+  final void Function(
+    String title,
+    String content,
+    List<String> tags,
+    String color,
+  )
+  onSave;
 
   @override
   State<_NoteFormSheet> createState() => _NoteFormSheetState();
@@ -2049,8 +2396,14 @@ class _NoteFormSheetState extends State<_NoteFormSheet> {
   final _tagsController = TextEditingController();
 
   final List<String> _colors = const [
-    '#8B5CF6', '#6366F1', '#3B82F6', '#22D3EE',
-    '#34D399', '#FBBF24', '#F97316', '#F87171',
+    '#8B5CF6',
+    '#6366F1',
+    '#3B82F6',
+    '#22D3EE',
+    '#34D399',
+    '#FBBF24',
+    '#F97316',
+    '#F87171',
   ];
 
   String _selectedColor = '#8B5CF6';
@@ -2077,39 +2430,60 @@ class _NoteFormSheetState extends State<_NoteFormSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surfaceGlass,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('📝 Éditer la Note', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const Text(
+            '📝 Éditer la Note',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
           const SizedBox(height: 14),
           TextField(
             controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Titre de la Note', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Titre de la Note',
+              border: OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _contentController,
             maxLines: 3,
-            decoration: const InputDecoration(labelText: 'Contenu', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Contenu',
+              border: OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _tagsController,
-            decoration: const InputDecoration(labelText: 'Tags (séparés par des virgules)', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Tags (séparés par des virgules)',
+              border: OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 14),
-          
+
           // Color Selector Strip (matches the bottom selector in the user's screenshot)
-          const Text(
+          Text(
             'Couleur d\'arrière-plan',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -2132,7 +2506,9 @@ class _NoteFormSheetState extends State<_NoteFormSheet> {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: active ? Colors.black : Colors.black.withValues(alpha: 0.08),
+                        color: active
+                            ? Colors.black
+                            : Colors.black.withValues(alpha: 0.08),
                         width: active ? 2.5 : 1,
                       ),
                       boxShadow: [
@@ -2145,30 +2521,46 @@ class _NoteFormSheetState extends State<_NoteFormSheet> {
                       ],
                     ),
                     child: active
-                        ? const Icon(Icons.check_rounded, color: Colors.black, size: 16)
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: Colors.black,
+                            size: 16,
+                          )
                         : null,
                   ),
                 );
               },
             ),
           ),
-          
+
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Annuler'),
+              ),
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () {
-                  final tags = _tagsController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-                  widget.onSave(_titleController.text.trim(), _contentController.text.trim(), tags, _selectedColor);
+                  final tags = _tagsController.text
+                      .split(',')
+                      .map((s) => s.trim())
+                      .where((s) => s.isNotEmpty)
+                      .toList();
+                  widget.onSave(
+                    _titleController.text.trim(),
+                    _contentController.text.trim(),
+                    tags,
+                    _selectedColor,
+                  );
                   Navigator.pop(context);
                 },
                 child: const Text('Enregistrer'),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -2202,37 +2594,73 @@ class _FlashcardFormSheetState extends State<_FlashcardFormSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surfaceGlass,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('🎴 Éditer la Flashcard', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const Text(
+            '🎴 Éditer la Flashcard',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
           const SizedBox(height: 14),
-          TextField(controller: _frontController, decoration: const InputDecoration(labelText: 'Question (Recto)', border: OutlineInputBorder())),
+          TextField(
+            controller: _frontController,
+            decoration: const InputDecoration(
+              labelText: 'Question (Recto)',
+              border: OutlineInputBorder(),
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _backController, decoration: const InputDecoration(labelText: 'Réponse (Verso)', border: OutlineInputBorder())),
+          TextField(
+            controller: _backController,
+            decoration: const InputDecoration(
+              labelText: 'Réponse (Verso)',
+              border: OutlineInputBorder(),
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _codeController, maxLines: 2, decoration: const InputDecoration(labelText: 'Extrait de code (Optionnel)', border: OutlineInputBorder())),
+          TextField(
+            controller: _codeController,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: 'Extrait de code (Optionnel)',
+              border: OutlineInputBorder(),
+            ),
+          ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Annuler'),
+              ),
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () {
-                  widget.onSave(_frontController.text.trim(), _backController.text.trim(), _codeController.text.isEmpty ? null : _codeController.text.trim());
+                  widget.onSave(
+                    _frontController.text.trim(),
+                    _backController.text.trim(),
+                    _codeController.text.isEmpty
+                        ? null
+                        : _codeController.text.trim(),
+                  );
                   Navigator.pop(context);
                 },
                 child: const Text('Enregistrer'),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -2242,7 +2670,15 @@ class _FlashcardFormSheetState extends State<_FlashcardFormSheet> {
 class _QcmFormSheet extends StatefulWidget {
   const _QcmFormSheet({this.qcm, required this.onSave});
   final QCM? qcm;
-  final void Function(String question, String type, List<String> options, dynamic correctAnswer, String? explanation, String? topic) onSave;
+  final void Function(
+    String question,
+    String type,
+    List<String> options,
+    dynamic correctAnswer,
+    String? explanation,
+    String? topic,
+  )
+  onSave;
 
   @override
   State<_QcmFormSheet> createState() => _QcmFormSheetState();
@@ -2268,7 +2704,9 @@ class _QcmFormSheetState extends State<_QcmFormSheet> {
         for (var i = 0; i < widget.qcm!.options.length && i < 4; i++) {
           _optControllers[i].text = widget.qcm!.options[i];
         }
-        _correctIndex = widget.qcm!.correctAnswer is int ? widget.qcm!.correctAnswer : 0;
+        _correctIndex = widget.qcm!.correctAnswer is int
+            ? widget.qcm!.correctAnswer
+            : 0;
       }
     }
   }
@@ -2276,35 +2714,71 @@ class _QcmFormSheetState extends State<_QcmFormSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.surfaceGlass, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceGlass,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('❓ Éditer le QCM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              '❓ Éditer le QCM',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 14),
-            TextField(controller: _questionController, decoration: const InputDecoration(labelText: 'Question', border: OutlineInputBorder())),
+            TextField(
+              controller: _questionController,
+              decoration: const InputDecoration(
+                labelText: 'Question',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _type,
               items: const [
-                DropdownMenuItem(value: 'multiple-choice', child: Text('Choix multiple')),
-                DropdownMenuItem(value: 'true-false', child: Text('Vrai / Faux')),
+                DropdownMenuItem(
+                  value: 'multiple-choice',
+                  child: Text('Choix multiple'),
+                ),
+                DropdownMenuItem(
+                  value: 'true-false',
+                  child: Text('Vrai / Faux'),
+                ),
               ],
-              onChanged: (val) => setState(() => _type = val ?? 'multiple-choice'),
+              onChanged: (val) =>
+                  setState(() => _type = val ?? 'multiple-choice'),
               decoration: const InputDecoration(border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
             if (_type == 'multiple-choice') ...[
               for (var i = 0; i < 4; i++) ...[
-                TextField(controller: _optControllers[i], decoration: InputDecoration(labelText: 'Option ${i + 1}', border: const OutlineInputBorder())),
+                TextField(
+                  controller: _optControllers[i],
+                  decoration: InputDecoration(
+                    labelText: 'Option ${i + 1}',
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
                 const SizedBox(height: 6),
               ],
               DropdownButtonFormField<int>(
                 initialValue: _correctIndex,
-                items: List.generate(4, (index) => DropdownMenuItem(value: index, child: Text('Option correcte : ${index + 1}'))),
+                items: List.generate(
+                  4,
+                  (index) => DropdownMenuItem(
+                    value: index,
+                    child: Text('Option correcte : ${index + 1}'),
+                  ),
+                ),
                 onChanged: (val) => setState(() => _correctIndex = val ?? 0),
                 decoration: const InputDecoration(border: OutlineInputBorder()),
               ),
@@ -2320,28 +2794,52 @@ class _QcmFormSheetState extends State<_QcmFormSheet> {
               ),
             ],
             const SizedBox(height: 12),
-            TextField(controller: _explanationController, decoration: const InputDecoration(labelText: 'Explication (Optionnelle)', border: OutlineInputBorder())),
+            TextField(
+              controller: _explanationController,
+              decoration: const InputDecoration(
+                labelText: 'Explication (Optionnelle)',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: _topicController, decoration: const InputDecoration(labelText: 'Sujet / Chapitre', border: OutlineInputBorder())),
+            TextField(
+              controller: _topicController,
+              decoration: const InputDecoration(
+                labelText: 'Sujet / Chapitre',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Annuler'),
+                ),
                 const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
                     final options = _type == 'multiple-choice'
                         ? _optControllers.map((c) => c.text.trim()).toList()
                         : ['true', 'false'];
-                    final dynamic ans = _type == 'multiple-choice' ? _correctIndex : (_correctIndex == 0 ? 'true' : 'false');
-                    widget.onSave(_questionController.text.trim(), _type, options, ans, _explanationController.text.trim(), _topicController.text.trim());
+                    final dynamic ans = _type == 'multiple-choice'
+                        ? _correctIndex
+                        : (_correctIndex == 0 ? 'true' : 'false');
+                    widget.onSave(
+                      _questionController.text.trim(),
+                      _type,
+                      options,
+                      ans,
+                      _explanationController.text.trim(),
+                      _topicController.text.trim(),
+                    );
                     Navigator.pop(context);
                   },
                   child: const Text('Enregistrer'),
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -2352,7 +2850,13 @@ class _QcmFormSheetState extends State<_QcmFormSheet> {
 class _CheatsheetFormSheet extends StatefulWidget {
   const _CheatsheetFormSheet({this.sheet, required this.onSave});
   final Cheatsheet? sheet;
-  final void Function(String title, String category, List<Map<String, String>> items, String? codeSample) onSave;
+  final void Function(
+    String title,
+    String category,
+    List<Map<String, String>> items,
+    String? codeSample,
+  )
+  onSave;
 
   @override
   State<_CheatsheetFormSheet> createState() => _CheatsheetFormSheetState();
@@ -2376,42 +2880,92 @@ class _CheatsheetFormSheetState extends State<_CheatsheetFormSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.surfaceGlass, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceGlass,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('📜 Ajouter un CheatSheet', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const Text(
+            '📜 Ajouter un CheatSheet',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _titleController, decoration: const InputDecoration(labelText: 'Titre', border: OutlineInputBorder())),
+          TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(
+              labelText: 'Titre',
+              border: OutlineInputBorder(),
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _catController, decoration: const InputDecoration(labelText: 'Catégorie', border: OutlineInputBorder())),
+          TextField(
+            controller: _catController,
+            decoration: const InputDecoration(
+              labelText: 'Catégorie',
+              border: OutlineInputBorder(),
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: TextField(controller: _keyController, decoration: const InputDecoration(labelText: 'Clé (Ex: SELECT)', border: OutlineInputBorder()))),
+              Expanded(
+                child: TextField(
+                  controller: _keyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Clé (Ex: SELECT)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: TextField(controller: _valController, decoration: const InputDecoration(labelText: 'Valeur (Ex: Lire)', border: OutlineInputBorder()))),
+              Expanded(
+                child: TextField(
+                  controller: _valController,
+                  decoration: const InputDecoration(
+                    labelText: 'Valeur (Ex: Lire)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Annuler'),
+              ),
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () {
                   final items = [
-                    {'key': _keyController.text.trim(), 'value': _valController.text.trim()}
+                    {
+                      'key': _keyController.text.trim(),
+                      'value': _valController.text.trim(),
+                    },
                   ];
-                  widget.onSave(_titleController.text.trim(), _catController.text.trim(), items, null);
+                  widget.onSave(
+                    _titleController.text.trim(),
+                    _catController.text.trim(),
+                    items,
+                    null,
+                  );
                   Navigator.pop(context);
                 },
                 child: const Text('Enregistrer'),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -2421,7 +2975,14 @@ class _CheatsheetFormSheetState extends State<_CheatsheetFormSheet> {
 class _ExerciseFormSheet extends StatefulWidget {
   const _ExerciseFormSheet({this.exercise, required this.onSave});
   final Exercise? exercise;
-  final void Function(String title, String description, String task, String correctSolution, String? solutionNote) onSave;
+  final void Function(
+    String title,
+    String description,
+    String task,
+    String correctSolution,
+    String? solutionNote,
+  )
+  onSave;
 
   @override
   State<_ExerciseFormSheet> createState() => _ExerciseFormSheetState();
@@ -2447,36 +3008,83 @@ class _ExerciseFormSheetState extends State<_ExerciseFormSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.surfaceGlass, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceGlass,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('💻 Ajouter un Exercice', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              '💻 Ajouter un Exercice',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: _titleController, decoration: const InputDecoration(labelText: 'Titre de l\'Exercice', border: OutlineInputBorder())),
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Titre de l\'Exercice',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: _descController, maxLines: 2, decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder())),
+            TextField(
+              controller: _descController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: _taskController, maxLines: 2, decoration: const InputDecoration(labelText: 'Consigne / Tâche', border: OutlineInputBorder())),
+            TextField(
+              controller: _taskController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Consigne / Tâche',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: _solController, maxLines: 2, decoration: const InputDecoration(labelText: 'Solution Attendue', border: OutlineInputBorder())),
+            TextField(
+              controller: _solController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Solution Attendue',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Annuler'),
+                ),
                 const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
-                    widget.onSave(_titleController.text.trim(), _descController.text.trim(), _taskController.text.trim(), _solController.text.trim(), null);
+                    widget.onSave(
+                      _titleController.text.trim(),
+                      _descController.text.trim(),
+                      _taskController.text.trim(),
+                      _solController.text.trim(),
+                      null,
+                    );
                     Navigator.pop(context);
                   },
                   child: const Text('Enregistrer'),
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -2556,11 +3164,12 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
   }
 
   void _copyAiPrompt() {
-    final prompt = 'Agis en tant qu\'assistant pédagogique d\'élite et expert en apprentissage SRS. Je souhaite générer du contenu pour mon application EduFocus. Voici le format JSON strict à respecter sous forme de tableau :\n\n$_placeholder\n\nGénère 10 éléments pertinents sur le sujet suivant : "[Insérer le titre de votre cours ou sujet spécifique ici]". Retourne UNIQUEMENT le tableau JSON brut valide (sans explications supplémentaires, sans balises markdown de code block, juste le JSON brut).';
+    final prompt =
+        'Agis en tant qu\'assistant pédagogique d\'élite et expert en apprentissage SRS. Je souhaite générer du contenu pour mon application EduFocus. Voici le format JSON strict à respecter sous forme de tableau :\n\n$_placeholder\n\nGénère 10 éléments pertinents sur le sujet suivant : "[Insérer le titre de votre cours ou sujet spécifique ici]". Retourne UNIQUEMENT le tableau JSON brut valide (sans explications supplémentaires, sans balises markdown de code block, juste le JSON brut).';
     Clipboard.setData(ClipboardData(text: prompt));
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text('🤖 Prompt de génération IA copié avec succès !'),
         backgroundColor: AppColors.accent,
         behavior: SnackBarBehavior.floating,
@@ -2570,9 +3179,9 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
 
   void _copyTemplateOnly() {
     Clipboard.setData(ClipboardData(text: _placeholder));
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text('📋 Modèle JSON copié !'),
         backgroundColor: AppColors.green,
         behavior: SnackBarBehavior.floating,
@@ -2583,12 +3192,17 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surfaceGlass,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2603,12 +3217,20 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
                     color: AppColors.accent.withValues(alpha: .1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.file_upload_rounded, color: AppColors.accentBright, size: 20),
+                  child: Icon(
+                    Icons.file_upload_rounded,
+                    color: AppColors.accentBright,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Text(
                   'Importation Intelligente',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: -0.4),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    letterSpacing: -0.4,
+                  ),
                 ),
               ],
             ),
@@ -2669,13 +3291,18 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
                             backgroundColor: Colors.white,
                             foregroundColor: const Color(0xFF4F46E5),
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             elevation: 0,
                           ),
                           icon: const Icon(Icons.psychology_rounded, size: 14),
                           label: const Text(
                             'Copier le prompt IA',
-                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -2687,31 +3314,44 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
                             foregroundColor: Colors.white,
                             side: const BorderSide(color: Colors.white38),
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                           icon: const Icon(Icons.code_rounded, size: 14),
                           label: const Text(
                             'Modèle JSON',
-                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 18),
 
             // Segmented Chips Selector
-            const Text(
+            Text(
               'Type de contenu à importer',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                _buildSegmentChip('flashcards', '🎴 Flashcards', AppColors.accentBright),
+                _buildSegmentChip(
+                  'flashcards',
+                  '🎴 Flashcards',
+                  AppColors.accentBright,
+                ),
                 const SizedBox(width: 8),
                 _buildSegmentChip('notes', '📝 Notes', AppColors.blue),
                 const SizedBox(width: 8),
@@ -2724,13 +3364,21 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
             TextField(
               controller: _jsonController,
               maxLines: 5,
-              style: const TextStyle(fontFamily: 'JetBrains Mono', fontSize: 11),
+              style: const TextStyle(
+                fontFamily: 'JetBrains Mono',
+                fontSize: 11,
+              ),
               decoration: InputDecoration(
                 hintText: _placeholder,
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 labelText: 'Collez le tableau JSON ici',
-                labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                labelStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 alignLabelWithHint: true,
               ),
             ),
@@ -2740,27 +3388,46 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
             Row(
               children: [
                 if (_validationStatus == 'empty') ...[
-                  const Icon(Icons.info_outline_rounded, color: AppColors.textMuted, size: 14),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: AppColors.textMuted,
+                    size: 14,
+                  ),
                   const SizedBox(width: 6),
-                  const Text('En attente du code JSON généré...', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                  Text(
+                    'En attente du code JSON généré...',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                  ),
                 ] else if (_validationStatus == 'valid') ...[
-                  const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 14),
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.green,
+                    size: 14,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'JSON Valide ! ($_parsedCount éléments détectés)',
-                    style: const TextStyle(color: AppColors.green, fontSize: 11, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: AppColors.green,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ] else ...[
-                  const Icon(Icons.cancel_rounded, color: AppColors.red, size: 14),
+                  Icon(Icons.cancel_rounded, color: AppColors.red, size: 14),
                   const SizedBox(width: 6),
-                  const Text(
+                  Text(
                     'Format JSON invalide (vérifiez les virgules)',
-                    style: TextStyle(color: AppColors.red, fontSize: 11, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: AppColors.red,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ]
+                ],
               ],
             ),
-            
+
             const SizedBox(height: 22),
 
             // Action Buttons
@@ -2775,19 +3442,24 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
                 ElevatedButton(
                   onPressed: _validationStatus == 'valid'
                       ? () {
-                          widget.onImport(_importType, _jsonController.text.trim());
+                          widget.onImport(
+                            _importType,
+                            _jsonController.text.trim(),
+                          );
                           Navigator.pop(context);
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: const Text('Importer'),
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -2806,9 +3478,14 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: active ? color.withValues(alpha: .12) : AppColors.surfaceGlass,
+            color: active
+                ? color.withValues(alpha: .12)
+                : AppColors.surfaceGlass,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: active ? color : AppColors.border, width: active ? 1.5 : 1),
+            border: Border.all(
+              color: active ? color : AppColors.border,
+              width: active ? 1.5 : 1,
+            ),
           ),
           child: Text(
             label,

@@ -111,7 +111,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '${AppRoutes.studyHub}/:id/notes/:noteId',
         builder: (context, state) {
           final note = state.extra as Note;
-          return NoteDetailScreen(note: note, packId: state.pathParameters['id']!);
+          return NoteDetailScreen(
+            note: note,
+            packId: state.pathParameters['id']!,
+          );
         },
       ),
       GoRoute(

@@ -46,10 +46,7 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
           ),
           label: Text(
             _segment == 0 ? 'Matière' : 'Tâche',
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
           ),
         ),
       ),
@@ -90,7 +87,7 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.border),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 15,
                           color: AppColors.textPrimary,
@@ -100,7 +97,8 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
                     const SizedBox(width: 14),
                     Text(
                       'Espace d\'étude',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.8,
                           ),
@@ -187,14 +185,15 @@ class _SegmentedControl extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: segment == 0
                         ? AppColors.heroGradient
-                        : const LinearGradient(
+                        : LinearGradient(
                             colors: [Color(0xFF059669), AppColors.green],
                           ),
                     borderRadius: BorderRadius.circular(13),
                     boxShadow: [
                       BoxShadow(
-                        color: (segment == 0 ? AppColors.accent : AppColors.green)
-                            .withValues(alpha: .35),
+                        color:
+                            (segment == 0 ? AppColors.accent : AppColors.green)
+                                .withValues(alpha: .35),
                         blurRadius: 12,
                         offset: const Offset(0, 3),
                       ),
@@ -273,10 +272,7 @@ class _SegmentTab extends StatelessWidget {
               const SizedBox(width: 6),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 7,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
                   color: active
                       ? Colors.white.withValues(alpha: .22)
@@ -321,12 +317,12 @@ class _SubjectsPane extends ConsumerWidget {
           ? const _EmptyHint(
               icon: Icons.menu_book_rounded,
               title: 'Aucune matière',
-              subtitle: 'Créez votre première matière pour structurer vos révisions.',
+              subtitle:
+                  'Créez votre première matière pour structurer vos révisions.',
             )
           : Column(
               children: [
-                for (final subject in list)
-                  _SubjectCard(subject: subject),
+                for (final subject in list) _SubjectCard(subject: subject),
               ],
             ),
     );
@@ -372,7 +368,7 @@ class _TodosPane extends ConsumerWidget {
                     Text(
                       '${doneList.length} sur ${list.length} terminées',
                       textAlign: TextAlign.right,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -386,7 +382,8 @@ class _TodosPane extends ConsumerWidget {
               const _EmptyHint(
                 icon: Icons.task_alt_rounded,
                 title: 'Gérez vos tâches',
-                subtitle: 'Ajoutez des tâches avec différents niveaux de priorité pour ne rien oublier.',
+                subtitle:
+                    'Ajoutez des tâches avec différents niveaux de priorité pour ne rien oublier.',
               )
             else ...[
               if (activeList.isNotEmpty) ...[
@@ -417,7 +414,7 @@ class _GroupLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.textMuted,
         fontSize: 12,
         fontWeight: FontWeight.w800,
@@ -478,14 +475,14 @@ class _SubjectCard extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${subject.totalStudyMinutes} mins · ${subject.totalSessions} sessions',
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 11),
                 ),
               ],
             ),
           ),
           IconButton(
             onPressed: () => showSubjectFormSheet(context, existing: subject),
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_rounded,
               size: 18,
               color: AppColors.textMuted,
@@ -493,7 +490,7 @@ class _SubjectCard extends ConsumerWidget {
           ),
           IconButton(
             onPressed: () => _confirmDelete(context, ref),
-            icon: const Icon(
+            icon: Icon(
               Icons.delete_outline_rounded,
               size: 18,
               color: AppColors.textMuted,
@@ -511,11 +508,16 @@ class _SubjectCard extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text('Supprimer la matière ?'),
-        content: Text('Toutes les sessions de focus liées à "${subject.name}" seront conservées, mais la matière sera supprimée définitivement.'),
+        content: Text(
+          'Toutes les sessions de focus liées à "${subject.name}" seront conservées, mais la matière sera supprimée définitivement.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler', style: TextStyle(color: AppColors.textMuted)),
+            child: Text(
+              'Annuler',
+              style: TextStyle(color: AppColors.textMuted),
+            ),
           ),
           FilledButton(
             onPressed: () {
@@ -537,22 +539,23 @@ class _TodoTile extends ConsumerWidget {
   final Todo todo;
 
   Color get _priorityColor => switch (todo.priority) {
-        'urgent' => AppColors.red,
-        'high' => AppColors.yellow,
-        'medium' => AppColors.cyan,
-        _ => AppColors.textMuted,
-      };
+    'urgent' => AppColors.red,
+    'high' => AppColors.yellow,
+    'medium' => AppColors.cyan,
+    _ => AppColors.textMuted,
+  };
 
   String get _priorityLabel => switch (todo.priority) {
-        'urgent' => 'Urgente',
-        'high' => 'Haute',
-        'medium' => 'Moyenne',
-        _ => 'Basse',
-      };
+    'urgent' => 'Urgente',
+    'high' => 'Haute',
+    'medium' => 'Moyenne',
+    _ => 'Basse',
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subjects = ref.watch(subjectsControllerProvider).value ?? const <Subject>[];
+    final subjects =
+        ref.watch(subjectsControllerProvider).value ?? const <Subject>[];
     Subject? subject;
     for (final s in subjects) {
       if (s.id == todo.subjectId) {
@@ -586,12 +589,13 @@ class _TodoTile extends ConsumerWidget {
             const SizedBox(width: 8),
             Checkbox(
               value: todo.done,
-              onChanged: (_) => ref.read(todosControllerProvider.notifier).toggle(todo),
+              onChanged: (_) =>
+                  ref.read(todosControllerProvider.notifier).toggle(todo),
               activeColor: AppColors.green,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
-              side: const BorderSide(color: AppColors.textMuted),
+              side: BorderSide(color: AppColors.textMuted),
             ),
             Expanded(
               child: Column(
@@ -655,15 +659,16 @@ class _TodoTile extends ConsumerWidget {
             ),
             IconButton(
               onPressed: () => showTodoFormSheet(context, existing: todo),
-              icon: const Icon(
+              icon: Icon(
                 Icons.edit_rounded,
                 size: 18,
                 color: AppColors.textMuted,
               ),
             ),
             IconButton(
-              onPressed: () => ref.read(todosControllerProvider.notifier).remove(todo.id),
-              icon: const Icon(
+              onPressed: () =>
+                  ref.read(todosControllerProvider.notifier).remove(todo.id),
+              icon: Icon(
                 Icons.delete_outline_rounded,
                 size: 18,
                 color: AppColors.textMuted,
@@ -737,7 +742,7 @@ class _InlineError extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: const TextStyle(color: AppColors.red, fontSize: 13),
+        style: TextStyle(color: AppColors.red, fontSize: 13),
       ),
     );
   }
