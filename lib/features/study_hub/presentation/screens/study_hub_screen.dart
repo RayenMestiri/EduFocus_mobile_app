@@ -725,6 +725,12 @@ class _PackCard extends StatelessWidget {
                         label: '${pack.exerciseCount} exos',
                         color: AppColors.green,
                       ),
+                    if (pack.cheatsheetCount > 0)
+                      _CountChip(
+                        icon: Icons.article_rounded,
+                        label: '${pack.cheatsheetCount} cheats',
+                        color: AppColors.yellow,
+                      ),
                   ],
                 ),
 

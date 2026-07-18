@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,6 +38,8 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
           _selectMode = false;
           _selectedIds.clear();
         });
+      } else {
+        setState(() {}); // Synchronize bottom navigation active tab on swipe
       }
     });
   }
@@ -707,6 +710,100 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
     );
   }
 
+  Color _getActiveTabColor(int index) {
+    switch (index) {
+      case 0:
+        return AppColors.accentBright; // Violet
+      case 1:
+        return AppColors.blue; // Blue
+      case 2:
+        return AppColors.cyan; // Cyan
+      case 3:
+        return AppColors.yellow; // Amber
+      case 4:
+        return AppColors.green; // Green
+      default:
+        return AppColors.accentBright;
+    }
+  }
+
+  Color _getSecondaryTabColor(int index) {
+    switch (index) {
+      case 0:
+        return AppColors.indigo; // Violet / Indigo
+      case 1:
+        return AppColors.accentBright; // Blue / Violet
+      case 2:
+        return AppColors.blue; // Cyan / Blue
+      case 3:
+        return AppColors.cyan; // Amber / Cyan
+      case 4:
+        return AppColors.cyan; // Green / Cyan
+      default:
+        return AppColors.indigo;
+    }
+  }
+
+  Widget _buildBottomNavBar(StudyPack pack) {
+    final activeColor = _getActiveTabColor(_tabController.index);
+    final tabs = [
+      (Icons.description_rounded, 'Notes', pack.noteCount),
+      (Icons.style_rounded, 'Cards', pack.cardCount),
+      (Icons.quiz_rounded, 'QCM', pack.qcmCount),
+      (Icons.article_rounded, 'Cheat', pack.cheatsheetCount),
+      (Icons.code_rounded, 'Exos', pack.exerciseCount),
+    ];
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow.withValues(alpha: AppColors.isLight ? 0.08 : 0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceGlass,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: AppColors.isLight
+                    ? AppColors.border.withValues(alpha: 0.8)
+                    : AppColors.borderBright,
+              ),
+            ),
+            child: Row(
+              children: [
+                for (var i = 0; i < tabs.length; i++)
+                  Expanded(
+                    child: _BottomNavItem(
+                      icon: tabs[i].$1,
+                      label: tabs[i].$2,
+                      count: tabs[i].$3,
+                      selected: _tabController.index == i,
+                      activeColor: activeColor,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        _tabController.animateTo(i);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final packAsync = ref.watch(studyPackProvider(widget.packId));
@@ -723,8 +820,20 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
         ),
       ),
       data: (pack) {
+        final activeColor = _getActiveTabColor(_tabController.index);
+
         return Scaffold(
+          extendBody: true,
+          extendBodyBehindAppBar: true,
+          backgroundColor: AppColors.bg,
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: AppColors.isLight ? Brightness.dark : Brightness.light,
+            ),
             leading: IconButton(
               onPressed: () {
                 if (_selectMode) {
@@ -789,177 +898,181 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
               ],
             ],
           ),
-          body: RefreshIndicator(
-            onRefresh: () =>
-                ref.refresh(studyPackProvider(widget.packId).future),
-            child: DefaultTabController(
-              length: 5,
-              child: Column(
-                children: [
-                  if (_isSaving)
-                    LinearProgressIndicator(
-                      minHeight: 2,
-                      color: AppColors.accent,
-                    ),
-                  // ── Sleek Compact Header Card ──
-                  _CompactHeroCard(pack: pack),
+          body: Stack(
+            children: [
+              // Ambient light field — the canvas never feels flat/dead
+              Positioned(
+                top: -110,
+                right: -90,
+                child: TweenAnimationBuilder<Color?>(
+                  duration: const Duration(milliseconds: 350),
+                  tween: ColorTween(end: activeColor),
+                  builder: (context, color, child) {
+                    return _GlowOrb(
+                      size: 300,
+                      color: color ?? AppColors.accentBright,
+                      alpha: .12,
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                bottom: 80,
+                left: -130,
+                child: TweenAnimationBuilder<Color?>(
+                  duration: const Duration(milliseconds: 350),
+                  tween: ColorTween(end: _getSecondaryTabColor(_tabController.index)),
+                  builder: (context, color, child) {
+                    return _GlowOrb(
+                      size: 340,
+                      color: color ?? AppColors.indigo,
+                      alpha: .08,
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 240,
+                left: -60,
+                child: TweenAnimationBuilder<Color?>(
+                  duration: const Duration(milliseconds: 350),
+                  tween: ColorTween(end: activeColor),
+                  builder: (context, color, child) {
+                    return _GlowOrb(
+                      size: 200,
+                      color: color ?? AppColors.cyan,
+                      alpha: .05,
+                    );
+                  },
+                ),
+              ),
 
-                  // Tab Bar View Header
-                  TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    indicatorColor: AppColors.accent,
-                    indicatorWeight: 2.5,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12,
-                    ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                    ),
-                    labelColor: AppColors.accentText,
-                    unselectedLabelColor: AppColors.textMuted,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    tabs: [
-                      Tab(
-                        child: Row(
-                          children: [
-                            const Text('📝 Notes'),
-                            const SizedBox(width: 4),
-                            _CountBadge(count: pack.noteCount),
-                          ],
+              SafeArea(
+                bottom: false,
+                child: RefreshIndicator(
+                  onRefresh: () =>
+                      ref.refresh(studyPackProvider(widget.packId).future),
+                  edgeOffset: 10,
+                  backgroundColor: AppColors.surfaceSecondary,
+                  color: AppColors.accentBright,
+                  child: Column(
+                    children: [
+                      if (_isSaving)
+                        LinearProgressIndicator(
+                          minHeight: 2,
+                          color: AppColors.accent,
                         ),
-                      ),
-                      Tab(
-                        child: Row(
+                      // ── Sleek Compact Header Card ──
+                      _CompactHeroCard(pack: pack, activeColor: activeColor),
+
+                      // Tab Content Area
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
                           children: [
-                            const Text('🎴 Cards'),
-                            const SizedBox(width: 4),
-                            _CountBadge(count: pack.cardCount),
-                          ],
-                        ),
-                      ),
-                      Tab(
-                        child: Row(
-                          children: [
-                            const Text('❓ QCM'),
-                            const SizedBox(width: 4),
-                            _CountBadge(count: pack.qcmCount),
-                          ],
-                        ),
-                      ),
-                      Tab(
-                        child: Row(
-                          children: [
-                            const Text('📜 Cheat'),
-                            const SizedBox(width: 4),
-                            _CountBadge(count: pack.cheatsheetCount),
-                          ],
-                        ),
-                      ),
-                      Tab(
-                        child: Row(
-                          children: [
-                            const Text('💻 Exos'),
-                            const SizedBox(width: 4),
-                            _CountBadge(count: pack.exerciseCount),
+                            _NotesTab(
+                              pack: pack,
+                              selectMode: _selectMode,
+                              selectedIds: _selectedIds,
+                              onToggleSelect: (id) => setState(() {
+                                if (_selectedIds.contains(id)) {
+                                  _selectedIds.remove(id);
+                                } else {
+                                  _selectedIds.add(id);
+                                }
+                              }),
+                              onEdit: (note) => _showEditItemSheet(pack, note),
+                            ),
+                            _FlashcardsTab(
+                              pack: pack,
+                              activeColor: activeColor,
+                              selectMode: _selectMode,
+                              selectedIds: _selectedIds,
+                              onToggleSelect: (id) => setState(() {
+                                if (_selectedIds.contains(id)) {
+                                  _selectedIds.remove(id);
+                                } else {
+                                  _selectedIds.add(id);
+                                }
+                              }),
+                              onEdit: (card) => _showEditItemSheet(pack, card),
+                            ),
+                            _QcmTab(
+                              pack: pack,
+                              selectMode: _selectMode,
+                              selectedIds: _selectedIds,
+                              onToggleSelect: (id) => setState(() {
+                                if (_selectedIds.contains(id)) {
+                                  _selectedIds.remove(id);
+                                } else {
+                                  _selectedIds.add(id);
+                                }
+                              }),
+                              onEdit: (qcm) => _showEditItemSheet(pack, qcm),
+                            ),
+                            _CheatsheetsTab(
+                              pack: pack,
+                              activeColor: activeColor,
+                              selectMode: _selectMode,
+                              selectedIds: _selectedIds,
+                              onToggleSelect: (id) => setState(() {
+                                if (_selectedIds.contains(id)) {
+                                  _selectedIds.remove(id);
+                                } else {
+                                  _selectedIds.add(id);
+                                }
+                              }),
+                              onEdit: (sheet) => _showEditItemSheet(pack, sheet),
+                            ),
+                            _ExercisesTab(
+                              pack: pack,
+                              selectMode: _selectMode,
+                              selectedIds: _selectedIds,
+                              onToggleSelect: (id) => setState(() {
+                                if (_selectedIds.contains(id)) {
+                                  _selectedIds.remove(id);
+                                } else {
+                                  _selectedIds.add(id);
+                                }
+                              }),
+                              onEdit: (ex) => _showEditItemSheet(pack, ex),
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
-
-                  // Tab Content Area
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _NotesTab(
-                          pack: pack,
-                          selectMode: _selectMode,
-                          selectedIds: _selectedIds,
-                          onToggleSelect: (id) => setState(() {
-                            if (_selectedIds.contains(id)) {
-                              _selectedIds.remove(id);
-                            } else {
-                              _selectedIds.add(id);
-                            }
-                          }),
-                          onEdit: (note) => _showEditItemSheet(pack, note),
-                        ),
-                        _FlashcardsTab(
-                          pack: pack,
-                          selectMode: _selectMode,
-                          selectedIds: _selectedIds,
-                          onToggleSelect: (id) => setState(() {
-                            if (_selectedIds.contains(id)) {
-                              _selectedIds.remove(id);
-                            } else {
-                              _selectedIds.add(id);
-                            }
-                          }),
-                          onEdit: (card) => _showEditItemSheet(pack, card),
-                        ),
-                        _QcmTab(
-                          pack: pack,
-                          selectMode: _selectMode,
-                          selectedIds: _selectedIds,
-                          onToggleSelect: (id) => setState(() {
-                            if (_selectedIds.contains(id)) {
-                              _selectedIds.remove(id);
-                            } else {
-                              _selectedIds.add(id);
-                            }
-                          }),
-                          onEdit: (qcm) => _showEditItemSheet(pack, qcm),
-                        ),
-                        _CheatsheetsTab(
-                          pack: pack,
-                          selectMode: _selectMode,
-                          selectedIds: _selectedIds,
-                          onToggleSelect: (id) => setState(() {
-                            if (_selectedIds.contains(id)) {
-                              _selectedIds.remove(id);
-                            } else {
-                              _selectedIds.add(id);
-                            }
-                          }),
-                          onEdit: (sheet) => _showEditItemSheet(pack, sheet),
-                        ),
-                        _ExercisesTab(
-                          pack: pack,
-                          selectMode: _selectMode,
-                          selectedIds: _selectedIds,
-                          onToggleSelect: (id) => setState(() {
-                            if (_selectedIds.contains(id)) {
-                              _selectedIds.remove(id);
-                            } else {
-                              _selectedIds.add(id);
-                            }
-                          }),
-                          onEdit: (ex) => _showEditItemSheet(pack, ex),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
+          bottomNavigationBar: _selectMode || _isSaving
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                  child: _buildBottomNavBar(pack),
+                ),
           floatingActionButton: _selectMode || _isSaving
               ? null
-              : FloatingActionButton(
-                  onPressed: () => _showAddItemSheet(pack),
-                  backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: Colors.white,
-                    size: 28,
+              : Padding(
+                  padding: const EdgeInsets.only(bottom: 84), // Shift up to avoid overlap with floating bottom nav
+                  child: TweenAnimationBuilder<Color?>(
+                    duration: const Duration(milliseconds: 350),
+                    tween: ColorTween(end: activeColor),
+                    builder: (context, color, child) {
+                      return FloatingActionButton(
+                        onPressed: () => _showAddItemSheet(pack),
+                        backgroundColor: color ?? AppColors.accent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      );
+                    },
                   ),
                 ),
         );
@@ -973,29 +1086,33 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
 // ══════════════════════════════════════════════════════════
 
 class _CompactHeroCard extends StatelessWidget {
-  const _CompactHeroCard({required this.pack});
+  const _CompactHeroCard({required this.pack, required this.activeColor});
 
   final StudyPack pack;
+  final Color activeColor;
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     final mastered = pack.countByState('mastered');
     final progress = pack.cardCount > 0
         ? (mastered / pack.cardCount).clamp(0.0, 1.0)
         : 0.0;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         gradient: AppColors.heroGradient,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: activeColor.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accentDeep.withValues(alpha: .24),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: activeColor.withValues(alpha: .22),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -1011,42 +1128,62 @@ class _CompactHeroCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 3,
+                        vertical: 3.5,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .15),
+                        color: Colors.white.withValues(alpha: .18),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         pack.subject.toUpperCase(),
-                        style: TextStyle(
+                        style: GoogleFonts.inter(
                           color: Colors.white,
-                          fontSize: 8,
+                          fontSize: 8.5,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
+                          letterSpacing: 1.0,
                         ),
                       ),
                     ),
                     if (pack.isPublic) ...[
                       const SizedBox(width: 8),
-                      const Text(
-                        '🌍 PUBLIC',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '🌍 ',
+                              style: TextStyle(fontSize: 8),
+                            ),
+                            Text(
+                              'PUBLIC',
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withValues(alpha: 0.8),
+                                fontSize: 8,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
                   pack.title,
-                  style: text.titleMedium?.copyWith(
+                  style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
-                    fontSize: 15,
+                    fontSize: 18,
                     letterSpacing: -0.4,
                   ),
                   maxLines: 1,
@@ -1054,41 +1191,42 @@ class _CompactHeroCard extends StatelessWidget {
                 ),
                 if (pack.description != null &&
                     pack.description!.isNotEmpty) ...[
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
                   Text(
                     pack.description!,
-                    style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 10,
-                      height: 1.2,
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 11,
+                      height: 1.3,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     _MiniStat(
                       icon: Icons.description_rounded,
                       value: '${pack.noteCount}',
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     _MiniStat(
                       icon: Icons.style_rounded,
                       value: '${pack.cardCount}',
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     _MiniStat(
                       icon: Icons.quiz_rounded,
                       value: '${pack.qcmCount}',
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     _MiniStat(
                       icon: Icons.article_rounded,
                       value: '${pack.cheatsheetCount}',
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     _MiniStat(
                       icon: Icons.code_rounded,
                       value: '${pack.exerciseCount}',
@@ -1103,23 +1241,24 @@ class _CompactHeroCard extends StatelessWidget {
           // Right side: Mastery progress circular indicator
           if (pack.cardCount > 0)
             Container(
-              width: 50,
-              height: 50,
-              padding: const EdgeInsets.all(3),
+              width: 54,
+              height: 54,
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .1),
+                color: Colors.white.withValues(alpha: .12),
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
               ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     child: CircularProgressIndicator(
                       value: progress,
-                      strokeWidth: 4,
-                      backgroundColor: Colors.white.withValues(alpha: .15),
+                      strokeWidth: 4.5,
+                      backgroundColor: Colors.white.withValues(alpha: .1),
                       valueColor: const AlwaysStoppedAnimation<Color>(
                         Colors.white,
                       ),
@@ -1127,11 +1266,11 @@ class _CompactHeroCard extends StatelessWidget {
                   ),
                   Text(
                     '${(progress * 100).round()}%',
-                    style: const TextStyle(
+                    style: GoogleFonts.jetBrainsMono(
                       color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
-                      fontFamily: 'JetBrains Mono',
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ],
@@ -1165,35 +1304,6 @@ class _MiniStat extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ══════════════════════════════════════════════════════════
-//  COUNT BADGE
-// ══════════════════════════════════════════════════════════
-
-class _CountBadge extends StatelessWidget {
-  const _CountBadge({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Text(
-        '$count',
-        style: TextStyle(
-          color: AppColors.accentBright,
-          fontSize: 9.5,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
     );
   }
 }
@@ -1366,7 +1476,7 @@ class _NotesTabState extends State<_NotesTab> {
 
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
             itemCount: sorted.length,
             itemBuilder: (context, index) {
               final note = sorted[index];
@@ -1428,9 +1538,9 @@ class _NoteCard extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.shadow.withValues(alpha: AppColors.isLight ? 0.05 : 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -1533,6 +1643,7 @@ class _NoteCard extends StatelessWidget {
 class _FlashcardsTab extends StatelessWidget {
   const _FlashcardsTab({
     required this.pack,
+    required this.activeColor,
     required this.selectMode,
     required this.selectedIds,
     required this.onToggleSelect,
@@ -1540,6 +1651,7 @@ class _FlashcardsTab extends StatelessWidget {
   });
 
   final StudyPack pack;
+  final Color activeColor;
   final bool selectMode;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelect;
@@ -1550,7 +1662,7 @@ class _FlashcardsTab extends StatelessWidget {
     final due = pack.dueCount;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
       children: [
         // SRS Summary & Study Button
         if (pack.flashcards.isNotEmpty && !selectMode) ...[
@@ -1561,7 +1673,7 @@ class _FlashcardsTab extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () => context.push('/study-hub/${pack.id}/flashcards'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
+                backgroundColor: activeColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -1840,7 +1952,7 @@ class _QcmTab extends StatelessWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
       children: [
         if (!selectMode) ...[
           SizedBox(
@@ -1963,6 +2075,7 @@ Color _getCategoryColor(String cat) {
 class _CheatsheetsTab extends StatelessWidget {
   const _CheatsheetsTab({
     required this.pack,
+    required this.activeColor,
     required this.selectMode,
     required this.selectedIds,
     required this.onToggleSelect,
@@ -1970,6 +2083,7 @@ class _CheatsheetsTab extends StatelessWidget {
   });
 
   final StudyPack pack;
+  final Color activeColor;
   final bool selectMode;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelect;
@@ -1986,7 +2100,7 @@ class _CheatsheetsTab extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
       itemCount: pack.cheatsheets.length,
       itemBuilder: (context, index) {
         final sheet = pack.cheatsheets[index];
@@ -2002,6 +2116,7 @@ class _CheatsheetsTab extends StatelessWidget {
             Expanded(
               child: _CheatsheetCard(
                 sheet: sheet,
+                activeColor: activeColor,
                 selectMode: selectMode,
                 onEdit: () => onEdit(sheet),
               ),
@@ -2016,11 +2131,13 @@ class _CheatsheetsTab extends StatelessWidget {
 class _CheatsheetCard extends StatefulWidget {
   const _CheatsheetCard({
     required this.sheet,
+    required this.activeColor,
     required this.selectMode,
     required this.onEdit,
   });
 
   final Cheatsheet sheet;
+  final Color activeColor;
   final bool selectMode;
   final VoidCallback onEdit;
 
@@ -2033,7 +2150,7 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
 
   @override
   Widget build(BuildContext context) {
-    final catColor = _getCategoryColor(widget.sheet.category);
+    final catColor = widget.activeColor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -2043,9 +2160,9 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: AppColors.shadow.withValues(alpha: AppColors.isLight ? 0.04 : 0.12),
             blurRadius: 12,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -2262,7 +2379,7 @@ class _ExercisesTab extends StatelessWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
       children: [
         if (!selectMode) ...[
           SizedBox(
@@ -3495,6 +3612,145 @@ class _ImportBottomSheetState extends State<_ImportBottomSheet> {
               fontWeight: FontWeight.w900,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  ADDITIONAL CUSTOM REDESIGN WIDGETS
+// ══════════════════════════════════════════════════════════
+
+class _GlowOrb extends StatelessWidget {
+  const _GlowOrb({
+    required this.size,
+    required this.color,
+    required this.alpha,
+  });
+
+  final double size;
+  final Color color;
+  final double alpha;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              color.withValues(alpha: alpha),
+              Colors.transparent,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final int count;
+  final bool selected;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? activeColor : AppColors.textMuted;
+    final badgeColor = selected ? activeColor : AppColors.textSecondary;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? activeColor.withValues(alpha: AppColors.isLight ? .14 : .22)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: activeColor.withValues(alpha: .2),
+                            blurRadius: 12,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  letterSpacing: .2,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
+          if (count > 0)
+            Positioned(
+              top: 8,
+              right: 10,
+              child: _TabBadge(count: count, color: badgeColor),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabBadge extends StatelessWidget {
+  const _TabBadge({required this.count, required this.color});
+  final int count;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
+      ),
+      child: Text(
+        '$count',
+        style: TextStyle(
+          color: color,
+          fontSize: 7.5,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'JetBrains Mono',
         ),
       ),
     );
