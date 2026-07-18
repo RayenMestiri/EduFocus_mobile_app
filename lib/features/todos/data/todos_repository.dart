@@ -3,24 +3,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/offline/local_store.dart';
+import '../../../core/offline/offline_context.dart';
+import '../../../core/offline/sync_queue.dart';
 import '../domain/todo.dart';
 
-/// CRUD against /api/todos (backend/routes/todos.js — `{success, data}`).
+/// Offline-first CRUD against /api/todos.
+///
+/// Same contract as before; when the network is unreachable, reads come from
+/// the cache and writes are applied optimistically then queued for replay.
 class TodosRepository {
-  TodosRepository(this._dio);
+  TodosRepository(this._dio, this._offline);
 
   final Dio _dio;
+  final OfflineContext _offline;
 
   Future<List<Todo>> list() async {
-    try {
-      final response = await _dio.get<Map<String, dynamic>>('/todos');
-      return (response.data?['data'] as List? ?? const [])
-          .whereType<Map<String, dynamic>>()
-          .map(Todo.fromJson)
-          .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    if (_offline.isOnline) {
+      try {
+        final response = await _dio.get<Map<String, dynamic>>('/todos');
+        final docs = (response.data?['data'] as List? ?? const [])
+            .whereType<Map<String, dynamic>>()
+            .toList();
+        await _offline.cache.replaceAllSynced({
+          for (final d in docs)
+            if (d['_id'] is String) d['_id'] as String: d,
+        });
+        return _fromCache();
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    return _fromCache();
+  }
+
+  Future<List<Todo>> _fromCache() async {
+    final docs = await _offline.cache.getAll();
+    return [for (final d in docs) Todo.fromJson(d)];
   }
 
   Future<Todo> create({
@@ -29,20 +48,40 @@ class TodosRepository {
     required String priority,
     String? subjectId,
   }) async {
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        '/todos',
-        data: {
-          'title': title,
-          'date': date,
-          'priority': priority,
-          if (subjectId != null && subjectId.isNotEmpty) 'subjectId': subjectId,
-        },
-      );
-      return Todo.fromJson(response.data!['data'] as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    final body = {
+      'title': title,
+      'date': date,
+      'priority': priority,
+      if (subjectId != null && subjectId.isNotEmpty) 'subjectId': subjectId,
+    };
+    if (_offline.isOnline) {
+      try {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/todos',
+          data: body,
+        );
+        final doc = response.data!['data'] as Map<String, dynamic>;
+        await _offline.cache.put(doc['_id'] as String, doc);
+        return Todo.fromJson(doc);
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    final tempId = newLocalId();
+    final doc = {...body, '_id': tempId, 'done': false};
+    await _offline.cache.put(tempId, doc);
+    await _offline.enqueue(
+      PendingOp(
+        id: newOpId(),
+        entity: 'todo',
+        method: 'POST',
+        path: '/todos',
+        body: body,
+        tempId: tempId,
+        targetId: tempId,
+      ),
+    );
+    return Todo.fromJson(doc);
   }
 
   Future<Todo> update(
@@ -51,41 +90,99 @@ class TodosRepository {
     required String priority,
     String? subjectId,
   }) async {
-    try {
-      final response = await _dio.put<Map<String, dynamic>>(
-        '/todos/$id',
-        data: {
-          'title': title,
-          'priority': priority,
-          // Backend unsets the subject when null/empty is sent.
-          'subjectId': subjectId ?? '',
-        },
-      );
-      return Todo.fromJson(response.data!['data'] as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    final body = {
+      'title': title,
+      'priority': priority,
+      // Backend unsets the subject when null/empty is sent.
+      'subjectId': subjectId ?? '',
+    };
+    if (_offline.isOnline && !isLocalId(id)) {
+      try {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/todos/$id',
+          data: body,
+        );
+        final doc = response.data!['data'] as Map<String, dynamic>;
+        await _offline.cache.put(id, doc);
+        return Todo.fromJson(doc);
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    final cached = await _offline.cache.get(id) ?? {'_id': id};
+    final merged = {...cached, ...body};
+    await _offline.cache.put(id, merged);
+    await _offline.enqueue(
+      PendingOp(
+        id: newOpId(),
+        entity: 'todo',
+        method: 'PUT',
+        path: '/todos/$id',
+        body: body,
+        targetId: id,
+      ),
+    );
+    return Todo.fromJson(merged);
   }
 
   Future<void> toggle(String id) async {
-    try {
-      await _dio.patch<Map<String, dynamic>>('/todos/$id/toggle');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    if (_offline.isOnline && !isLocalId(id)) {
+      try {
+        await _dio.patch<Map<String, dynamic>>('/todos/$id/toggle');
+        final cached = await _offline.cache.get(id);
+        if (cached != null) {
+          cached['done'] = !(cached['done'] as bool? ?? false);
+          await _offline.cache.put(id, cached);
+        }
+        return;
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    final cached = await _offline.cache.get(id);
+    if (cached != null) {
+      cached['done'] = !(cached['done'] as bool? ?? false);
+      await _offline.cache.put(id, cached);
+    }
+    await _offline.enqueue(
+      PendingOp(
+        id: newOpId(),
+        entity: 'todo',
+        method: 'PATCH',
+        path: '/todos/$id/toggle',
+        targetId: id,
+      ),
+    );
   }
 
   Future<void> delete(String id) async {
-    try {
-      await _dio.delete<Map<String, dynamic>>('/todos/$id');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    if (_offline.isOnline && !isLocalId(id)) {
+      try {
+        await _dio.delete<Map<String, dynamic>>('/todos/$id');
+        await _offline.cache.delete(id);
+        return;
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    await _offline.cache.delete(id);
+    await _offline.enqueue(
+      PendingOp(
+        id: newOpId(),
+        entity: 'todo',
+        method: 'DELETE',
+        path: '/todos/$id',
+        targetId: id,
+      ),
+    );
   }
 }
 
 final todosRepositoryProvider = Provider<TodosRepository>((ref) {
-  return TodosRepository(ref.watch(apiClientProvider));
+  return TodosRepository(
+    ref.watch(apiClientProvider),
+    offlineContext(ref, 'todos'),
+  );
 });
 
 class TodosController extends AsyncNotifier<List<Todo>> {

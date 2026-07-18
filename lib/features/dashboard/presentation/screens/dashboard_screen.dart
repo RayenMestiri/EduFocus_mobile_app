@@ -319,7 +319,7 @@ class _DashboardBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(flex: 5, child: _TasksOrb(today: today)),
+                Expanded(flex: 5, child: const _PlannerButton()),
               ],
             ),
           ),
@@ -419,7 +419,9 @@ class _FocusHero extends StatelessWidget {
                 ? AppColors.shadow.withValues(alpha: .06)
                 : AppColors.accentDeep.withValues(alpha: .22),
             blurRadius: AppColors.isLight ? 20 : 36,
-            offset: AppColors.isLight ? const Offset(0, 8) : const Offset(0, 16),
+            offset: AppColors.isLight
+                ? const Offset(0, 8)
+                : const Offset(0, 16),
           ),
         ],
       ),
@@ -689,9 +691,7 @@ class _StreakCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.yellow.withValues(
-              alpha: AppColors.isLight ? .05 : .1,
-            ),
+            AppColors.yellow.withValues(alpha: AppColors.isLight ? .05 : .1),
             AppColors.surfaceGlass,
           ],
         ),
@@ -781,72 +781,89 @@ class _StreakCard extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TASKS ORB (narrow, circular)
+// PLANNER BUTTON (tactile action tile next to streak)
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _TasksOrb extends StatelessWidget {
-  const _TasksOrb({required this.today});
-
-  final TodayStats today;
+class _PlannerButton extends StatelessWidget {
+  const _PlannerButton();
 
   @override
   Widget build(BuildContext context) {
-    final ratio = today.totalTasks == 0
-        ? 0.0
-        : today.completedTasks / today.totalTasks;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceGlass,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 60,
-            height: 60,
-            child: Stack(
-              alignment: Alignment.center,
+    final palette = context.palette;
+    return _Pressable(
+      onTap: () => context.push(AppRoutes.planner),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: palette.accent.withValues(
+              alpha: AppColors.isLight ? .35 : .22,
+            ),
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              palette.accent.withValues(alpha: AppColors.isLight ? .05 : .1),
+              palette.surfaceGlass,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CircularProgressIndicator(
-                    value: ratio == 0 ? null : ratio,
-                    strokeWidth: 5,
-                    backgroundColor: AppColors.surfaceHover,
-                    valueColor: AlwaysStoppedAnimation(AppColors.blue),
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: palette.accent.withValues(alpha: .18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.edit_calendar_rounded,
+                    color: palette.accent,
+                    size: 18,
                   ),
                 ),
                 Icon(
-                  Icons.task_alt_rounded,
-                  color: AppColors.blue.withValues(alpha: .8),
-                  size: 20,
+                  Icons.arrow_forward_ios_rounded,
+                  color: palette.textMuted,
+                  size: 12,
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${today.completedTasks}/${today.totalTasks}',
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w800,
-              fontSize: 15,
-              color: AppColors.textPrimary,
+            const SizedBox(height: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'PLANIFIER',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 10,
+                    letterSpacing: 1.0,
+                    color: palette.accentText,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Organiser la journée',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    letterSpacing: -0.3,
+                    color: palette.textPrimary,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'tâches',
-            style: TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1036,17 +1053,13 @@ class _SubjectSpotlight extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: color.withValues(
-              alpha: AppColors.isLight ? .16 : .28,
-            ),
+            color: color.withValues(alpha: AppColors.isLight ? .16 : .28),
           ),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withValues(
-                alpha: AppColors.isLight ? .05 : .16,
-              ),
+              color.withValues(alpha: AppColors.isLight ? .05 : .16),
               AppColors.surfaceGlass,
             ],
           ),

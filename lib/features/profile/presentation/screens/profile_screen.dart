@@ -494,7 +494,9 @@ class _SettingSlider extends StatelessWidget {
             inactiveTrackColor: AppColors.surfaceHover,
             overlayColor: color.withValues(alpha: .15),
             trackHeight: 4,
-            tickMarkShape: const _InactiveOnlyTickMarkShape(tickMarkRadius: 1.2),
+            tickMarkShape: const _InactiveOnlyTickMarkShape(
+              tickMarkRadius: 1.2,
+            ),
             inactiveTickMarkColor: color.withValues(alpha: .24),
           ),
           child: Slider(
@@ -548,7 +550,9 @@ class _InactiveOnlyTickMarkShape extends SliderTickMarkShape {
     final Canvas canvas = context.canvas;
     final double radius = tickMarkRadius ?? 1.5;
     final Paint paint = Paint()
-      ..color = sliderTheme.inactiveTickMarkColor ?? Colors.grey.withValues(alpha: 0.5);
+      ..color =
+          sliderTheme.inactiveTickMarkColor ??
+          Colors.grey.withValues(alpha: 0.5);
 
     canvas.drawCircle(center, radius, paint);
   }

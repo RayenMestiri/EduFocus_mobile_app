@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
+import '../../../../core/offline/offline_badge.dart';
 import '../../../todos/data/todos_repository.dart';
 import '../../../todos/domain/todo.dart';
 import '../../../todos/presentation/widgets/todo_form_sheet.dart';
@@ -97,13 +98,19 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    Text(
-                      'Espace d\'étude',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.8,
-                          ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Espace d\'étude',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.8,
+                              ),
+                        ),
+                        const OfflineBadge(),
+                      ],
                     ),
                   ],
                 ),

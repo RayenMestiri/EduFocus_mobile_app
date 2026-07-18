@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/offline/offline_context.dart';
+import '../../../core/offline/sync_queue.dart';
 
 /// Timer settings synced with GET/PUT /api/auth/timer-settings
 /// (backend User.preferences.studySettings).
@@ -73,42 +75,72 @@ class TimerSettings {
 }
 
 class SettingsRepository {
-  SettingsRepository(this._dio);
+  SettingsRepository(this._dio, this._offline);
 
   final Dio _dio;
+  final OfflineContext _offline;
+
+  static const _cacheKey = 'timer';
 
   Future<TimerSettings> fetch() async {
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '/auth/timer-settings',
-      );
-      final settings = response.data?['settings'];
-      return settings is Map<String, dynamic>
-          ? TimerSettings.fromJson(settings)
-          : const TimerSettings();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    if (_offline.isOnline) {
+      try {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/auth/timer-settings',
+        );
+        final settings = response.data?['settings'];
+        if (settings is Map<String, dynamic>) {
+          await _offline.cache.put(_cacheKey, settings);
+          return TimerSettings.fromJson(settings);
+        }
+        return const TimerSettings();
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    final cached = await _offline.cache.get(_cacheKey);
+    return cached != null
+        ? TimerSettings.fromJson(cached)
+        : const TimerSettings();
   }
 
   Future<TimerSettings> save(TimerSettings settings) async {
-    try {
-      final response = await _dio.put<Map<String, dynamic>>(
-        '/auth/timer-settings',
-        data: settings.toJson(),
-      );
-      final saved = response.data?['settings'];
-      return saved is Map<String, dynamic>
-          ? TimerSettings.fromJson(saved)
-          : settings;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    if (_offline.isOnline) {
+      try {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/auth/timer-settings',
+          data: settings.toJson(),
+        );
+        final saved = response.data?['settings'];
+        final result = saved is Map<String, dynamic>
+            ? TimerSettings.fromJson(saved)
+            : settings;
+        await _offline.cache.put(_cacheKey, result.toJson());
+        return result;
+      } on DioException catch (e) {
+        if (!isTransportError(e)) throw ApiException.fromDio(e);
+      }
     }
+    // Offline: keep the user's choice locally and queue the sync.
+    await _offline.cache.put(_cacheKey, settings.toJson());
+    await _offline.enqueue(
+      PendingOp(
+        id: newOpId(),
+        entity: 'settings',
+        method: 'PUT',
+        path: '/auth/timer-settings',
+        body: settings.toJson(),
+      ),
+    );
+    return settings;
   }
 }
 
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
-  return SettingsRepository(ref.watch(apiClientProvider));
+  return SettingsRepository(
+    ref.watch(apiClientProvider),
+    offlineContext(ref, 'settings'),
+  );
 });
 
 final timerSettingsProvider = FutureProvider.autoDispose<TimerSettings>((ref) {

@@ -108,164 +108,177 @@ class _SubjectFormSheetState extends ConsumerState<_SubjectFormSheet> {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    final double bottomPadding = keyboardHeight > 0 ? 24.0 : 108.0;
 
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+      padding: EdgeInsets.only(bottom: keyboardHeight),
       child: Container(
+        constraints: BoxConstraints(
+          maxWidth: 600,
+          maxHeight: screenHeight * 0.85 - keyboardHeight,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(top: BorderSide(color: AppColors.borderBright)),
         ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.textMuted.withValues(alpha: .4),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
+        padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted.withValues(alpha: .4),
+                  borderRadius: BorderRadius.circular(99),
                 ),
               ),
-              Text(
-                widget.existing == null
-                    ? 'Nouvelle matière'
-                    : 'Modifier la matière',
-                style: text.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
+            ),
+            Text(
+              widget.existing == null
+                  ? 'Nouvelle matière'
+                  : 'Modifier la matière',
+              style: text.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
-              const SizedBox(height: 20),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    _error!,
-                    style: TextStyle(color: AppColors.red, fontSize: 13),
-                  ),
-                ),
-              TextField(
-                controller: _name,
-                enabled: !_saving,
-                decoration: const InputDecoration(
-                  labelText: 'Nom de la matière',
-                  hintText: 'Ex : Mathématiques',
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'ICÔNE',
-                style: text.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  fontSize: 10,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final emoji in _emojiChoices)
-                    GestureDetector(
-                      onTap: () => setState(() => _icon = emoji),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 46,
-                        height: 46,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _icon == emoji
-                              ? AppColors.accent.withValues(alpha: .18)
-                              : AppColors.surfaceSecondary,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _icon == emoji
-                                ? AppColors.accent
-                                : AppColors.border,
-                            width: _icon == emoji ? 1.5 : 1,
-                          ),
-                        ),
+            ),
+            const SizedBox(height: 20),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          emoji,
-                          style: const TextStyle(fontSize: 20),
+                          _error!,
+                          style: TextStyle(color: AppColors.red, fontSize: 13),
                         ),
                       ),
+                    TextField(
+                      controller: _name,
+                      enabled: !_saving,
+                      decoration: const InputDecoration(
+                        labelText: 'Nom de la matière',
+                        hintText: 'Ex : Mathématiques',
+                      ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'COULEUR',
-                style: text.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  fontSize: 10,
+                    const SizedBox(height: 20),
+                    Text(
+                      'ICÔNE',
+                      style: text.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        fontSize: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final emoji in _emojiChoices)
+                          GestureDetector(
+                            onTap: () => setState(() => _icon = emoji),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              width: 46,
+                              height: 46,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: _icon == emoji
+                                    ? AppColors.accent.withValues(alpha: .18)
+                                    : AppColors.surfaceSecondary,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _icon == emoji
+                                      ? AppColors.accent
+                                      : AppColors.border,
+                                  width: _icon == emoji ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'COULEUR',
+                      style: text.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        fontSize: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        for (final hex in _colorChoices)
+                          GestureDetector(
+                            onTap: () => setState(() => _color = hex),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: Color(
+                                  0xFF000000 | int.parse(hex.substring(1), radix: 16),
+                                ),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: _color == hex
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  width: 2.5,
+                                ),
+                              ),
+                              child: _color == hex
+                                  ? const Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 18,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final hex in _colorChoices)
-                    GestureDetector(
-                      onTap: () => setState(() => _color = hex),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: Color(
-                            0xFF000000 | int.parse(hex.substring(1), radix: 16),
-                          ),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _color == hex
-                                ? Colors.white
-                                : Colors.transparent,
-                            width: 2.5,
-                          ),
-                        ),
-                        child: _color == hex
-                            ? const Icon(
-                                Icons.check_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              )
-                            : null,
+            ),
+            const SizedBox(height: 28),
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              FilledButton(
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(widget.existing == null ? 'Ajouter' : 'Enregistrer'),
-              ),
-            ],
-          ),
+                    )
+                  : Text(widget.existing == null ? 'Ajouter' : 'Enregistrer'),
+            ),
+          ],
         ),
       ),
     );

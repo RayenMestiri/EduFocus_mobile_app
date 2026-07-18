@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
+import '../../../../core/offline/offline_badge.dart';
 
 /// Chronometer — device-local like the Angular version (no backend).
 class ChronoScreen extends ConsumerStatefulWidget {
@@ -60,7 +61,10 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
     final h = d.inHours.toString().padLeft(2, '0');
     final m = (d.inMinutes % 60).toString().padLeft(2, '0');
     final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    final cs = ((d.inMilliseconds % 1000) / 10).truncate().toString().padLeft(2, '0');
+    final cs = ((d.inMilliseconds % 1000) / 10).truncate().toString().padLeft(
+      2,
+      '0',
+    );
     return '$h:$m:$s.$cs';
   }
 
@@ -109,14 +113,20 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'ESPACE ÉTUDE  >  CHRONOMÈTRE',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textMuted,
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'ESPACE ÉTUDE  >  CHRONOMÈTRE',
+                            style: GoogleFonts.inter(
+                              color: AppColors.textMuted,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const OfflineBadge(),
+                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(

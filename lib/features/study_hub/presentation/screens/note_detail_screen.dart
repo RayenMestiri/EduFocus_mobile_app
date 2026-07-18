@@ -1515,15 +1515,19 @@ class _CodeBlock extends StatelessWidget {
                 const SizedBox(width: 7),
                 _dot(const Color(0xFF27C93F)),
                 const SizedBox(width: 14),
-                Text(
-                  language,
-                  style: GoogleFonts.jetBrainsMono(
-                    color: const Color(0xFF8B949E),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    language,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.jetBrainsMono(
+                      color: const Color(0xFF8B949E),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 InkWell(
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: code));

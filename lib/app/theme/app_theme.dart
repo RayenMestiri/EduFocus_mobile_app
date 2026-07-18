@@ -157,12 +157,15 @@ abstract final class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? Colors.white : p.textSecondary,
+          (s) =>
+              s.contains(WidgetState.selected) ? Colors.white : p.textSecondary,
         ),
         trackColor: WidgetStateProperty.resolveWith(
           (s) => s.contains(WidgetState.selected) ? p.accent : p.surfaceHover,
         ),
-        trackOutlineColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+        trackOutlineColor: const WidgetStatePropertyAll<Color>(
+          Colors.transparent,
+        ),
       ),
       sliderTheme: SliderThemeData(
         inactiveTrackColor: p.surfaceHover,

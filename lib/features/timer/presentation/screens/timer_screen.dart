@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
+import '../../../../core/offline/offline_badge.dart';
 import '../../../subjects/data/subjects_repository.dart';
 import '../../../subjects/domain/subject.dart';
 import '../timer_controller.dart';
@@ -61,14 +62,20 @@ class TimerScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'ESPACE ÉTUDE  >  POMODORO',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textMuted,
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'ESPACE ÉTUDE  >  POMODORO',
+                            style: GoogleFonts.inter(
+                              color: AppColors.textMuted,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const OfflineBadge(),
+                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(

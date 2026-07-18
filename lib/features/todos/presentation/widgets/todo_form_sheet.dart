@@ -91,158 +91,171 @@ class _TodoFormSheetState extends ConsumerState<_TodoFormSheet> {
     final text = Theme.of(context).textTheme;
     final subjects =
         ref.watch(subjectsControllerProvider).value ?? const <Subject>[];
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    final double bottomPadding = keyboardHeight > 0 ? 24.0 : 108.0;
 
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+      padding: EdgeInsets.only(bottom: keyboardHeight),
       child: Container(
+        constraints: BoxConstraints(
+          maxWidth: 600,
+          maxHeight: screenHeight * 0.85 - keyboardHeight,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(top: BorderSide(color: AppColors.borderBright)),
         ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.textMuted.withValues(alpha: .4),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
+        padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted.withValues(alpha: .4),
+                  borderRadius: BorderRadius.circular(99),
                 ),
               ),
-              Text(
-                widget.existing == null
-                    ? 'Nouvelle tâche'
-                    : 'Modifier la tâche',
-                style: text.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
+            ),
+            Text(
+              widget.existing == null
+                  ? 'Nouvelle tâche'
+                  : 'Modifier la tâche',
+              style: text.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
-              const SizedBox(height: 20),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    _error!,
-                    style: TextStyle(color: AppColors.red, fontSize: 13),
-                  ),
-                ),
-              TextField(
-                controller: _title,
-                enabled: !_saving,
-                decoration: const InputDecoration(
-                  labelText: 'Titre',
-                  hintText: 'Ex : Réviser le chapitre 4',
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'PRIORITÉ',
-                style: text.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  fontSize: 10,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  for (final (value, label, color) in kPriorities)
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _priority = value),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: _priority == value
-                                ? color.withValues(alpha: .16)
-                                : AppColors.surfaceSecondary,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _priority == value
-                                  ? color
-                                  : AppColors.border,
-                            ),
-                          ),
-                          child: Text(
-                            label,
-                            style: TextStyle(
-                              color: _priority == value
-                                  ? color
-                                  : AppColors.textSecondary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+            ),
+            const SizedBox(height: 20),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          _error!,
+                          style: TextStyle(color: AppColors.red, fontSize: 13),
                         ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'MATIÈRE (OPTIONNEL)',
-                style: text.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  fontSize: 10,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  GestureDetector(
-                    onTap: () => setState(() => _subjectId = null),
-                    child: _SubjectChip(
-                      label: 'Aucune',
-                      color: AppColors.textMuted,
-                      selected: _subjectId == null,
-                    ),
-                  ),
-                  for (final subject in subjects)
-                    GestureDetector(
-                      onTap: () => setState(() => _subjectId = subject.id),
-                      child: _SubjectChip(
-                        label: subject.name,
-                        color: subject.color,
-                        selected: _subjectId == subject.id,
+                    TextField(
+                      controller: _title,
+                      enabled: !_saving,
+                      decoration: const InputDecoration(
+                        labelText: 'Titre',
+                        hintText: 'Ex : Réviser le chapitre 4',
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              FilledButton(
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
+                    const SizedBox(height: 20),
+                    Text(
+                      'PRIORITÉ',
+                      style: text.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        fontSize: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        for (final (value, label, color) in kPriorities)
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _priority = value),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: _priority == value
+                                      ? color.withValues(alpha: .16)
+                                      : AppColors.surfaceSecondary,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _priority == value
+                                        ? color
+                                        : AppColors.border,
+                                  ),
+                                ),
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    color: _priority == value
+                                        ? color
+                                        : AppColors.textSecondary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'MATIÈRE (OPTIONNEL)',
+                      style: text.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        fontSize: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() => _subjectId = null),
+                          child: _SubjectChip(
+                            label: 'Aucune',
+                            color: AppColors.textMuted,
+                            selected: _subjectId == null,
+                          ),
                         ),
-                      )
-                    : Text(widget.existing == null ? 'Ajouter' : 'Enregistrer'),
+                        for (final subject in subjects)
+                          GestureDetector(
+                            onTap: () => setState(() => _subjectId = subject.id),
+                            child: _SubjectChip(
+                              label: subject.name,
+                              color: subject.color,
+                              selected: _subjectId == subject.id,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 28),
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(widget.existing == null ? 'Ajouter' : 'Enregistrer'),
+            ),
+          ],
         ),
       ),
     );

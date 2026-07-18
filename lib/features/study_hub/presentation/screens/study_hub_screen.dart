@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
+import '../../../../core/offline/offline_badge.dart';
 import '../../data/study_packs_repository.dart';
 import '../../domain/study_pack.dart';
 
@@ -124,14 +125,20 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'ESPACE ÉTUDE  >  STUDY HUB',
-                              style: GoogleFonts.inter(
-                                color: AppColors.textMuted,
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.5,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'ESPACE ÉTUDE  >  STUDY HUB',
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.textMuted,
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                const OfflineBadge(),
+                              ],
                             ),
                             const SizedBox(height: 3),
                             Text(
