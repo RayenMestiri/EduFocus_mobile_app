@@ -19,6 +19,7 @@ List<(String, String, Color)> get kPriorities => [
 Future<bool?> showTodoFormSheet(BuildContext context, {Todo? existing}) {
   return showModalBottomSheet<bool>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => _TodoFormSheet(existing: existing),
@@ -94,7 +95,9 @@ class _TodoFormSheetState extends ConsumerState<_TodoFormSheet> {
     final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    final double bottomPadding = keyboardHeight > 0 ? 24.0 : 108.0;
+    final double bottomPadding = keyboardHeight > 0
+        ? 24.0
+        : (28.0 + MediaQuery.of(context).padding.bottom);
 
     return Padding(
       padding: EdgeInsets.only(bottom: keyboardHeight),

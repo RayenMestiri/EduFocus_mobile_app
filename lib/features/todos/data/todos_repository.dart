@@ -25,10 +25,28 @@ class TodosRepository {
         final docs = (response.data?['data'] as List? ?? const [])
             .whereType<Map<String, dynamic>>()
             .toList();
-        await _offline.cache.replaceAllSynced({
-          for (final d in docs)
-            if (d['_id'] is String) d['_id'] as String: d,
-        });
+
+        final ops = await _offline.queue.all();
+        final todoOps = ops.where((op) => op.entity == 'todo').toList();
+
+        final updatedDocs = <String, Map<String, dynamic>>{};
+        for (final d in docs) {
+          final id = d['_id'] as String;
+          var doc = Map<String, dynamic>.from(d);
+
+          for (final op in todoOps) {
+            if (op.targetId == id) {
+              if (op.method == 'PUT' && op.body != null) {
+                doc = {...doc, ...op.body!};
+              } else if (op.method == 'PATCH' && op.path.endsWith('/toggle')) {
+                doc['done'] = !(doc['done'] as bool? ?? false);
+              }
+            }
+          }
+          updatedDocs[id] = doc;
+        }
+
+        await _offline.cache.replaceAllSynced(updatedDocs);
         return _fromCache();
       } on DioException catch (e) {
         if (!isTransportError(e)) throw ApiException.fromDio(e);

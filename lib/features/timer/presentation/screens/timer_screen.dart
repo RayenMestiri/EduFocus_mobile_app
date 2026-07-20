@@ -8,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
 import '../../../../core/offline/offline_badge.dart';
+import '../../../../shared/feedback/celebration_modal.dart';
 import '../../../subjects/data/subjects_repository.dart';
 import '../../../subjects/domain/subject.dart';
 import '../timer_controller.dart';
@@ -23,6 +24,21 @@ class TimerScreen extends ConsumerWidget {
     final subjects = ref.watch(subjectsControllerProvider);
     final isBreak = timer.phase == TimerPhase.shortBreak;
     final text = Theme.of(context).textTheme;
+
+    // A focus session just completed the instant the state machine rolls
+    // from focus into the break phase (timer_controller.dart's `_tick`).
+    ref.listen<PomodoroState>(pomodoroControllerProvider, (previous, next) {
+      final justCompleted =
+          previous?.phase == TimerPhase.focus &&
+          next.phase == TimerPhase.shortBreak;
+      if (!justCompleted) return;
+      showFocusCompletionModal(
+        context,
+        focusedDuration: Duration(minutes: previous!.focusMinutes),
+        onLogBreak: () =>
+            ref.read(pomodoroControllerProvider.notifier).resume(),
+      );
+    });
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -292,99 +308,7 @@ class TimerScreen extends ConsumerWidget {
                 ),
               ),
             ] else ...[
-              if (isBreak &&
-                  !timer.isRunning &&
-                  timer.remainingSeconds == timer.breakMinutes * 60) ...[
-                // Prompt for pause/continue when focus just finished
-                Container(
-                  margin: const EdgeInsets.only(top: 24),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceGlass,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.celebration_rounded,
-                        color: AppColors.yellow,
-                        size: 40,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Session Focus Terminée ! 🎉',
-                        style: GoogleFonts.outfit(
-                          color: AppColors.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Voulez-vous prendre une pause de respiration ou continuer directement ?',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: () => ref
-                                  .read(pomodoroControllerProvider.notifier)
-                                  .resume(),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.green,
-                                minimumSize: const Size(0, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.self_improvement_rounded,
-                                size: 18,
-                              ),
-                              label: const Text(
-                                'Pause',
-                                style: TextStyle(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => ref
-                                  .read(pomodoroControllerProvider.notifier)
-                                  .skipBreak(),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.textPrimary,
-                                side: BorderSide(color: AppColors.border),
-                                minimumSize: const Size(0, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.flash_on_rounded,
-                                size: 18,
-                              ),
-                              label: const Text(
-                                'Continuer',
-                                style: TextStyle(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ] else if (isBreak && timer.isRunning) ...[
+              if (isBreak && timer.isRunning) ...[
                 // Premium respiration & background audio view during active break
                 BreathingRelaxationView(
                   onSkip: () =>

@@ -6,7 +6,6 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../subjects/data/subjects_repository.dart';
 import '../../../subjects/domain/subject.dart';
-import '../../data/dashboard_repository.dart';
 import '../../data/day_plan_repository.dart';
 import '../../domain/day_plan.dart';
 
@@ -62,10 +61,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     };
 
     try {
-      await ref.read(dayPlanRepositoryProvider).savePlan(payload);
+      final updated = await ref.read(dayPlanRepositoryProvider).savePlan(payload);
 
-      ref.invalidate(dayPlanProvider(_selectedDateStr));
-      ref.invalidate(dashboardStatsProvider);
+      ref.read(dayPlanProvider(_selectedDateStr).notifier).updatePlan(updated);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

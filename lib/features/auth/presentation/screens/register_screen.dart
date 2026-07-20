@@ -167,8 +167,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     : const Text('Créer mon compte'),
               ),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     'Déjà membre ?',

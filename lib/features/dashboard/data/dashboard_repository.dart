@@ -48,7 +48,8 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 });
 
 /// Auto-disposing so stats are re-fetched fresh when the screen is reopened;
-/// pull-to-refresh invalidates this provider.
+/// pull-to-refresh or explicit invalidation (e.g. after a timer session) are
+/// the only triggers for a new network call.
 final dashboardStatsProvider = FutureProvider.autoDispose<DashboardStats>((
   ref,
 ) {

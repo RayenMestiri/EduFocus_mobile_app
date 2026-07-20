@@ -27,10 +27,27 @@ class SubjectsRepository {
         final docs = (response.data?['data'] as List? ?? const [])
             .whereType<Map<String, dynamic>>()
             .toList();
-        await _offline.cache.replaceAllSynced({
-          for (final d in docs)
-            if (d['_id'] is String) d['_id'] as String: d,
-        });
+
+        final ops = await _offline.queue.all();
+        final pendingPuts = {
+          for (final op in ops)
+            if (op.entity == 'subject' &&
+                op.method == 'PUT' &&
+                op.targetId != null)
+              op.targetId!: op.body
+        };
+
+        final updatedDocs = <String, Map<String, dynamic>>{};
+        for (final d in docs) {
+          final id = d['_id'] as String;
+          if (pendingPuts.containsKey(id)) {
+            updatedDocs[id] = {...d, ...pendingPuts[id]!};
+          } else {
+            updatedDocs[id] = d;
+          }
+        }
+
+        await _offline.cache.replaceAllSynced(updatedDocs);
         return _fromCache();
       } on DioException catch (e) {
         if (!isTransportError(e)) throw ApiException.fromDio(e);
@@ -162,10 +179,12 @@ class SubjectsController extends AsyncNotifier<List<Subject>> {
     required String icon,
   }) async {
     try {
-      await ref
+      final created = await ref
           .read(subjectsRepositoryProvider)
           .create(name: name, colorHex: colorHex, icon: icon);
-      ref.invalidateSelf();
+      // Optimistic: append the new subject instantly — no network re-fetch.
+      final current = state.value ?? [];
+      state = AsyncData([...current, created]);
       return null;
     } on ApiException catch (e) {
       return e.message;
@@ -179,10 +198,15 @@ class SubjectsController extends AsyncNotifier<List<Subject>> {
     required String icon,
   }) async {
     try {
-      await ref
+      final updated = await ref
           .read(subjectsRepositoryProvider)
           .update(id, name: name, colorHex: colorHex, icon: icon);
-      ref.invalidateSelf();
+      // Optimistic: patch the single item in-place — no network re-fetch.
+      final current = state.value ?? [];
+      state = AsyncData([
+        for (final s in current)
+          if (s.id == id) updated else s,
+      ]);
       return null;
     } on ApiException catch (e) {
       return e.message;
@@ -192,13 +216,16 @@ class SubjectsController extends AsyncNotifier<List<Subject>> {
   Future<String?> remove(String id) async {
     try {
       await ref.read(subjectsRepositoryProvider).delete(id);
-      ref.invalidateSelf();
+      // Optimistic: filter out the deleted subject instantly — no network re-fetch.
+      final current = state.value ?? [];
+      state = AsyncData([for (final s in current) if (s.id != id) s]);
       return null;
     } on ApiException catch (e) {
       return e.message;
     }
   }
 }
+
 
 final subjectsControllerProvider =
     AsyncNotifierProvider<SubjectsController, List<Subject>>(

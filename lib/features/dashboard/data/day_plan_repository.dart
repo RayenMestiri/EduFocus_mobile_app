@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 
@@ -40,9 +41,22 @@ final dayPlanRepositoryProvider = Provider<DayPlanRepository>((ref) {
   return DayPlanRepository(ref.watch(apiClientProvider));
 });
 
-final dayPlanProvider = FutureProvider.autoDispose.family<DayPlan, String>((
-  ref,
-  date,
-) {
-  return ref.watch(dayPlanRepositoryProvider).getPlanForDate(date);
-});
+class DayPlanController extends AsyncNotifier<DayPlan> {
+  DayPlanController(this.date);
+  final String date;
+
+  @override
+  FutureOr<DayPlan> build() {
+    return ref.watch(dayPlanRepositoryProvider).getPlanForDate(date);
+  }
+
+  void updatePlan(DayPlan plan) {
+    state = AsyncData(plan);
+  }
+}
+
+final dayPlanProvider =
+    AsyncNotifierProvider.autoDispose.family<DayPlanController, DayPlan, String>(
+      DayPlanController.new,
+    );
+

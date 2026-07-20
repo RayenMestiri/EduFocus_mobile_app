@@ -41,7 +41,7 @@ abstract final class RecommendationEngine {
     return [
       opening,
       diagnosis.toString(),
-      if (strengthLine != null) strengthLine,
+      ?strengthLine,
       closing,
     ].join('\n\n');
   }

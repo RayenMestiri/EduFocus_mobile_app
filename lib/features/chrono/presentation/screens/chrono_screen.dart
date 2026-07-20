@@ -75,6 +75,11 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
     final running = _stopwatch.isRunning;
     final elapsed = _stopwatch.elapsed;
 
+    final formatted = _format(elapsed);
+    final dotIndex = formatted.lastIndexOf('.');
+    final mainTime = dotIndex != -1 ? formatted.substring(0, dotIndex) : formatted;
+    final centiseconds = dotIndex != -1 ? formatted.substring(dotIndex) : '';
+
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: SafeArea(
@@ -182,20 +187,27 @@ class _ChronoScreenState extends ConsumerState<ChronoScreen> {
               ),
               child: Column(
                 children: [
-                  Text(
-                    _format(elapsed),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: mainTime),
+                        TextSpan(
+                          text: centiseconds,
+                          style: TextStyle(
+                            fontSize: 32,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                     textAlign: TextAlign.center,
                     style: text.displayLarge?.copyWith(
                       fontWeight: FontWeight.w800,
-                      fontSize: 44,
-                      letterSpacing: -1.2,
+                      fontSize: 48,
+                      letterSpacing: -1.0,
+                      color: AppColors.textPrimary,
                       fontFeatures: const [FontFeature.tabularFigures()],
-                      shadows: [
-                        Shadow(
-                          color: AppColors.cyan.withValues(alpha: .35),
-                          blurRadius: 24,
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(height: 6),

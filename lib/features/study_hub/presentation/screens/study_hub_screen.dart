@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/offline/offline_badge.dart';
 import '../../data/study_packs_repository.dart';
 import '../../domain/study_pack.dart';
@@ -27,7 +28,13 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
       builder: (sheetCtx) {
         return _ImportPackSheet(
           onImport: (code) async {
-            final cleanId = code.trim().replaceFirst('EDU-', '').toLowerCase();
+            final match = RegExp(r'[a-fA-F0-9]{24}').firstMatch(code);
+            final cleanId = match != null ? match.group(0)!.toLowerCase() : code.trim().replaceAll(RegExp(r'edu-', caseSensitive: false), '').toLowerCase();
+
+            if (cleanId.length != 24 || !RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(cleanId)) {
+              throw const ApiException('Code ou lien de partage invalide. Assurez-vous d\'entrer un code valide (ex: EDU-60F8BA5A...) ou de coller le lien de partage.');
+            }
+
             final messenger = ScaffoldMessenger.of(context);
             await ref.read(studyPacksRepositoryProvider).clone(cleanId);
             ref.invalidate(studyPacksProvider);
@@ -91,7 +98,7 @@ class _StudyHubScreenState extends ConsumerState<StudyHubScreen> {
 
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                 children: [
                   // ── Premium Handcrafted Breadcrumb Header ──
                   Row(
@@ -891,9 +898,14 @@ class _ImportPackSheetState extends State<_ImportPackSheet> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = e.toString().contains('404')
-              ? 'Pack non trouvé. Vérifiez le code.'
-              : 'Erreur lors de l\'importation. Réessayez.';
+          final errorStr = e.toString();
+          if (errorStr.contains('404')) {
+            _error = 'Pack non trouvé. Vérifiez le code.';
+          } else if (e is ApiException) {
+            _error = e.message;
+          } else {
+            _error = 'Erreur lors de l\'importation. Réessayez.';
+          }
         });
       }
     }

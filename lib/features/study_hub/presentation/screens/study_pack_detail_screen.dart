@@ -7,6 +7,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/config/env.dart';
+import '../../../../shared/feedback/delete_confirm_sheet.dart';
+import '../../../../shared/feedback/import_overlay.dart';
+import '../../../../shared/feedback/overlay_toast.dart';
+import '../../../../shared/feedback/publish_success_modal.dart';
 import '../../data/study_packs_repository.dart';
 import '../../domain/study_pack.dart';
 
@@ -52,292 +57,214 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
 
   String _generateUuid() => DateTime.now().microsecondsSinceEpoch.toString();
 
+  /// Reveals an already-known import result a few items at a time instead
+  /// of flashing the final count instantly — the shimmer skeleton in
+  /// [showImportProgressOverlay] fills in as each tick arrives.
+  Stream<ImportProgressEvent> _staggeredImportProgress(
+    ImportCategory category,
+    int total,
+  ) async* {
+    if (total == 0) {
+      yield ImportProgressEvent(category: category, done: 0, total: 0);
+      return;
+    }
+    final stepDelay = total <= 10
+        ? const Duration(milliseconds: 90)
+        : total <= 30
+        ? const Duration(milliseconds: 40)
+        : const Duration(milliseconds: 15);
+    for (var i = 1; i <= total; i++) {
+      await Future.delayed(stepDelay);
+      yield ImportProgressEvent(category: category, done: i, total: total);
+    }
+  }
+
   Future<void> _togglePublic(StudyPack pack) async {
-    setState(() => _isSaving = true);
-    try {
-      final newStatus = !pack.isPublic;
-      await ref.read(studyPacksRepositoryProvider).update(pack.id, {
-        'isPublic': newStatus,
-      });
-      ref.invalidate(studyPackProvider(pack.id));
-      if (mounted) {
-        if (newStatus) {
-          await Clipboard.setData(
-            ClipboardData(
-              text: 'http://localhost:4200/study-hub/shared/${pack.id}',
-            ),
+    if (pack.isPublic) {
+      if (!mounted) return;
+      final action = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (sheetContext) => Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(top: BorderSide(color: AppColors.borderBright)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Options de partage',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Icon(Icons.share_rounded, color: AppColors.accentText),
+                title: const Text('Voir le lien et le code de partage'),
+                onTap: () => Navigator.of(sheetContext).pop('share'),
+              ),
+              ListTile(
+                leading: Icon(Icons.lock_rounded, color: AppColors.red),
+                title: const Text('Rendre le pack privé'),
+                onTap: () => Navigator.of(sheetContext).pop('private'),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+
+      if (action == 'share') {
+        if (!mounted) return;
+        showPublishSuccessModal(
+          context,
+          itemTitle: pack.title,
+          shareLink: '${Env.frontendUrl}/study-hub/shared/${pack.id}',
+          shareCode: 'EDU-${pack.id.toUpperCase()}',
+        );
+      } else if (action == 'private') {
+        setState(() => _isSaving = true);
+        try {
+          await ref.read(studyPacksRepositoryProvider).update(pack.id, {
+            'isPublic': false,
+          });
+          ref.invalidate(studyPackProvider(pack.id));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('🔒 Pack d\'étude rendu privé.'),
+                backgroundColor: AppColors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erreur : $e'),
+                backgroundColor: AppColors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        } finally {
+          if (mounted) setState(() => _isSaving = false);
+        }
+      }
+    } else {
+      setState(() => _isSaving = true);
+      try {
+        await ref.read(studyPacksRepositoryProvider).update(pack.id, {
+          'isPublic': true,
+        });
+        ref.invalidate(studyPackProvider(pack.id));
+        if (mounted) {
+          showPublishSuccessModal(
+            context,
+            itemTitle: pack.title,
+            shareLink: '${Env.frontendUrl}/study-hub/shared/${pack.id}',
+            shareCode: 'EDU-${pack.id.toUpperCase()}',
           );
-          _showShareDialog(pack.id);
-        } else {
+        }
+      } catch (e) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('🔒 Pack d\'étude rendu privé.'),
-              backgroundColor: AppColors.green,
+              content: Text('Erreur de publication : $e'),
+              backgroundColor: AppColors.red,
               behavior: SnackBarBehavior.floating,
             ),
           );
         }
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur de publication : $e'),
-            backgroundColor: AppColors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
     }
   }
 
-  void _showShareDialog(String packId) {
-    final shareLink = 'http://localhost:4200/study-hub/shared/$packId';
-    final mobileCode = 'EDU-${packId.toUpperCase()}';
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceGlass,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: AppColors.border),
-        ),
-        title: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: AppColors.green.withValues(alpha: .15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.share_rounded,
-                size: 18,
-                color: AppColors.green,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Partager le Pack',
-                style: GoogleFonts.outfit(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Le pack d\'étude est désormais public. Partagez-le avec les liens et codes ci-dessous :',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 18),
+  StudyItemType _itemTypeForTab(int tab) => switch (tab) {
+    0 => StudyItemType.notes,
+    1 => StudyItemType.flashcards,
+    2 => StudyItemType.qcms,
+    3 => StudyItemType.cheatsheets,
+    _ => StudyItemType.exercises,
+  };
 
-            // ── WEB APPLICATION LINK ──
-            Text(
-              'LIEN DE L\'APPLICATION WEB',
-              style: GoogleFonts.inter(
-                color: AppColors.textMuted,
-                fontSize: 9.5,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.bg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      shareLink,
-                      style: GoogleFonts.jetBrainsMono(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: shareLink));
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(
-                          content: Text('Lien web copié !'),
-                          backgroundColor: AppColors.green,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: .15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.content_copy_rounded,
-                        size: 14,
-                        color: AppColors.accentBright,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+  /// Confirms via a bottom sheet, then exits select mode immediately but
+  /// defers the actual mutation: the items stay untouched until the undo
+  /// toast's countdown expires, so "Annuler" costs nothing but a tap.
+  Future<void> _deleteSelectedItems(StudyPack pack) async {
+    final activeTab = _tabController.index;
+    final ids = Set<String>.from(_selectedIds);
+    final count = ids.length;
 
-            // ── MOBILE APP CODE ──
-            Text(
-              'CODE DE L\'APPLICATION MOBILE',
-              style: GoogleFonts.inter(
-                color: AppColors.textMuted,
-                fontSize: 9.5,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.bg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      mobileCode,
-                      style: GoogleFonts.jetBrainsMono(
-                        color: AppColors.textPrimary,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: mobileCode));
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(
-                          content: Text('Code mobile copié !'),
-                          backgroundColor: AppColors.green,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: .15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.content_copy_rounded,
-                        size: 14,
-                        color: AppColors.accentBright,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle_outline_rounded,
-                  color: AppColors.green,
-                  size: 14,
-                ),
-                SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Lien copié par défaut dans le presse-papiers.',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textPrimary),
-            child: const Text(
-              'Fermer',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      type: _itemTypeForTab(activeTab),
+      title: 'Supprimer la sélection ?',
+      count: count,
+      detail: 'Pack concerné : « ${pack.title} ».',
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _selectMode = false;
+      _selectedIds.clear();
+    });
+
+    final type = _itemTypeForTab(activeTab);
+    showUndoToast(
+      context,
+      message: '$count ${type.label(count)} supprimé${count > 1 ? 's' : ''}',
+      subtitle: 'Vous pouvez annuler pendant quelques secondes.',
+      icon: Icons.delete_outline_rounded,
+      accentColor: AppColors.red,
+      onExpire: () => _commitDelete(pack, activeTab, ids),
     );
   }
 
-  Future<void> _deleteSelectedItems(StudyPack pack) async {
+  Future<void> _commitDelete(
+    StudyPack pack,
+    int activeTab,
+    Set<String> ids,
+  ) async {
+    if (!mounted) return;
     setState(() => _isSaving = true);
     try {
       final updatedPayload = <String, dynamic>{};
-      final activeTab = _tabController.index;
 
       if (activeTab == 0) {
-        final updated = pack.notes
-            .where((n) => !_selectedIds.contains(n.id))
+        updatedPayload['notes'] = pack.notes
+            .where((n) => !ids.contains(n.id))
             .map((n) => n.toJson())
             .toList();
-        updatedPayload['notes'] = updated;
       } else if (activeTab == 1) {
-        final updated = pack.flashcards
-            .where((f) => !_selectedIds.contains(f.id))
+        updatedPayload['flashcards'] = pack.flashcards
+            .where((f) => !ids.contains(f.id))
             .map((f) => f.toJson())
             .toList();
-        updatedPayload['flashcards'] = updated;
       } else if (activeTab == 2) {
-        final updated = pack.qcm
-            .where((q) => !_selectedIds.contains(q.id))
+        updatedPayload['qcm'] = pack.qcm
+            .where((q) => !ids.contains(q.id))
             .map((q) => q.toJson())
             .toList();
-        updatedPayload['qcm'] = updated;
       } else if (activeTab == 3) {
-        final updated = pack.cheatsheets
-            .where((c) => !_selectedIds.contains(c.id))
+        updatedPayload['cheatsheets'] = pack.cheatsheets
+            .where((c) => !ids.contains(c.id))
             .map((c) => c.toJson())
             .toList();
-        updatedPayload['cheatsheets'] = updated;
       } else if (activeTab == 4) {
-        final updated = pack.exercises
-            .where((e) => !_selectedIds.contains(e.id))
+        updatedPayload['exercises'] = pack.exercises
+            .where((e) => !ids.contains(e.id))
             .map((e) => e.toJson())
             .toList();
-        updatedPayload['exercises'] = updated;
       }
 
       await ref
@@ -345,21 +272,6 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
           .update(pack.id, updatedPayload);
       ref.invalidate(studyPackProvider(pack.id));
       ref.invalidate(studyPacksProvider);
-
-      setState(() {
-        _selectMode = false;
-        _selectedIds.clear();
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('🗑️ Éléments supprimés avec succès !'),
-            backgroundColor: AppColors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -445,12 +357,15 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
               ref.invalidate(studyPacksProvider);
 
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('📥 Données importées avec succès !'),
-                    backgroundColor: AppColors.green,
-                    behavior: SnackBarBehavior.floating,
-                  ),
+                final category = switch (type) {
+                  'flashcards' => ImportCategory.flashcards,
+                  'qcm' => ImportCategory.qcms,
+                  _ => ImportCategory.notes,
+                };
+                showImportProgressOverlay(
+                  context,
+                  events: _staggeredImportProgress(category, parsed.length),
+                  onOpenHub: () => context.go('/study-hub'),
                 );
               }
             } catch (e) {
@@ -759,7 +674,9 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: AppColors.isLight ? 0.08 : 0.4),
+            color: AppColors.shadow.withValues(
+              alpha: AppColors.isLight ? 0.08 : 0.4,
+            ),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -832,7 +749,9 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
             scrolledUnderElevation: 0,
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
-              statusBarIconBrightness: AppColors.isLight ? Brightness.dark : Brightness.light,
+              statusBarIconBrightness: AppColors.isLight
+                  ? Brightness.dark
+                  : Brightness.light,
             ),
             leading: IconButton(
               onPressed: () {
@@ -921,7 +840,9 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
                 left: -130,
                 child: TweenAnimationBuilder<Color?>(
                   duration: const Duration(milliseconds: 350),
-                  tween: ColorTween(end: _getSecondaryTabColor(_tabController.index)),
+                  tween: ColorTween(
+                    end: _getSecondaryTabColor(_tabController.index),
+                  ),
                   builder: (context, color, child) {
                     return _GlowOrb(
                       size: 340,
@@ -1022,7 +943,8 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
                                   _selectedIds.add(id);
                                 }
                               }),
-                              onEdit: (sheet) => _showEditItemSheet(pack, sheet),
+                              onEdit: (sheet) =>
+                                  _showEditItemSheet(pack, sheet),
                             ),
                             _ExercisesTab(
                               pack: pack,
@@ -1048,14 +970,21 @@ class _StudyPackDetailScreenState extends ConsumerState<StudyPackDetailScreen>
           ),
           bottomNavigationBar: _selectMode || _isSaving
               ? null
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-                  child: _buildBottomNavBar(pack),
+              : SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                    child: _buildBottomNavBar(pack),
+                  ),
                 ),
           floatingActionButton: _selectMode || _isSaving
               ? null
               : Padding(
-                  padding: const EdgeInsets.only(bottom: 84), // Shift up to avoid overlap with floating bottom nav
+                  padding: EdgeInsets.only(
+                    bottom: 20 + MediaQuery.of(context).padding.bottom,
+                  ), // Shift up to avoid overlap with floating bottom nav
                   child: TweenAnimationBuilder<Color?>(
                     duration: const Duration(milliseconds: 350),
                     tween: ColorTween(end: activeColor),
@@ -1158,10 +1087,7 @@ class _CompactHeroCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              '🌍 ',
-                              style: TextStyle(fontSize: 8),
-                            ),
+                            const Text('🌍 ', style: TextStyle(fontSize: 8)),
                             Text(
                               'PUBLIC',
                               style: GoogleFonts.inter(
@@ -1538,7 +1464,9 @@ class _NoteCard extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: AppColors.isLight ? 0.05 : 0.15),
+            color: AppColors.shadow.withValues(
+              alpha: AppColors.isLight ? 0.05 : 0.15,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -2055,23 +1983,6 @@ class _QcmTab extends StatelessWidget {
 //  CHEATSHEETS TAB WITH ACTIONS
 // ══════════════════════════════════════════════════════════
 
-Color _getCategoryColor(String cat) {
-  final c = cat.toLowerCase();
-  if (c.contains('math') || c.contains('calcul') || c.contains('formule')) {
-    return const Color(0xFF3B82F6); // Vibrant Blue
-  }
-  if (c.contains('code') ||
-      c.contains('sql') ||
-      c.contains('dev') ||
-      c.contains('prog')) {
-    return const Color(0xFF8B5CF6); // Vibrant Purple
-  }
-  if (c.contains('science') || c.contains('physique') || c.contains('chimie')) {
-    return const Color(0xFF10B981); // Emerald Green
-  }
-  return const Color(0xFF06B6D4); // Cyan
-}
-
 class _CheatsheetsTab extends StatelessWidget {
   const _CheatsheetsTab({
     required this.pack,
@@ -2160,7 +2071,9 @@ class _CheatsheetCardState extends State<_CheatsheetCard> {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: AppColors.isLight ? 0.04 : 0.12),
+            color: AppColors.shadow.withValues(
+              alpha: AppColors.isLight ? 0.04 : 0.12,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -3688,10 +3601,15 @@ class _BottomNavItem extends StatelessWidget {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: selected
-                      ? activeColor.withValues(alpha: AppColors.isLight ? .14 : .22)
+                      ? activeColor.withValues(
+                          alpha: AppColors.isLight ? .14 : .22,
+                        )
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: selected

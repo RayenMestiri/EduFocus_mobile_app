@@ -51,7 +51,7 @@ class _AiScreenState extends ConsumerState<AiScreen> {
       if (!_scroll.hasClients) return;
       final maxScroll = _scroll.position.maxScrollExtent;
       final currentScroll = _scroll.position.pixels;
-      
+
       // If force is true (e.g. user just sent a message), always scroll to the end.
       // Otherwise, only auto-scroll if the user is already near the bottom (within 140 pixels).
       if (force || (maxScroll - currentScroll < 140)) {
@@ -617,7 +617,8 @@ class _CoachBubbleState extends State<_CoachBubble> {
   @override
   void initState() {
     super.initState();
-    _showReport = !widget.isLast ||
+    _showReport =
+        !widget.isLast ||
         widget.message.narrative == null ||
         widget.message.narrative!.isEmpty;
   }
@@ -673,7 +674,9 @@ class _CoachBubbleState extends State<_CoachBubble> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      widget.message.source == 'gemini' ? 'Gemini' : 'Analyse locale',
+                      widget.message.source == 'gemini'
+                          ? 'Gemini'
+                          : 'Analyse locale',
                       style: TextStyle(
                         color: widget.message.source == 'gemini'
                             ? AppColors.green
@@ -703,7 +706,8 @@ class _CoachBubbleState extends State<_CoachBubble> {
               onDone: () {
                 if (mounted && !_showReport) {
                   setState(() => _showReport = true);
-                  widget.onStream(); // Scroll to end to reveal the new report card!
+                  widget
+                      .onStream(); // Scroll to end to reveal the new report card!
                 }
               },
             ),
@@ -1348,11 +1352,11 @@ class _InputBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-        14,
         8,
-        14,
+        8,
+        8,
         // Clear the floating nav bar.
-        MediaQuery.of(context).padding.bottom + 96,
+        MediaQuery.of(context).padding.bottom + 12,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

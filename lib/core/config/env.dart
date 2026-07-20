@@ -26,8 +26,22 @@ abstract final class Env {
     if (!kIsWeb &&
         Platform.isAndroid &&
         _rawBaseUrl == 'http://localhost:5002') {
-      return 'http://10.0.2.2:5002';
+      return 'http://127.0.0.1:5002';
     }
     return _rawBaseUrl;
+  }
+
+  static const String _rawFrontendUrl = String.fromEnvironment(
+    'FRONTEND_URL',
+    defaultValue: 'http://localhost:4200',
+  );
+
+  static String get frontendUrl {
+    if (!kIsWeb &&
+        Platform.isAndroid &&
+        _rawFrontendUrl == 'http://localhost:4200') {
+      return 'http://127.0.0.1:4200';
+    }
+    return _rawFrontendUrl;
   }
 }

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_controller.dart';
 import '../../../../core/offline/offline_badge.dart';
+import '../../../../shared/feedback/overlay_toast.dart';
+import '../../../../shared/feedback/premium_dialog.dart';
 import '../../../todos/data/todos_repository.dart';
 import '../../../todos/domain/todo.dart';
 import '../../../todos/presentation/widgets/todo_form_sheet.dart';
@@ -31,7 +33,9 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
 
     return Scaffold(
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 86),
+        padding: EdgeInsets.only(
+          bottom: 20 + MediaQuery.of(context).padding.bottom,
+        ),
         child: FloatingActionButton.extended(
           heroTag: 'st-fab',
           onPressed: () => _segment == 0
@@ -512,32 +516,22 @@ class _SubjectCard extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Supprimer la matière ?'),
-        content: Text(
-          'Toutes les sessions de focus liées à "${subject.name}" seront conservées, mais la matière sera supprimée définitivement.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Annuler',
-              style: TextStyle(color: AppColors.textMuted),
-            ),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref.read(subjectsControllerProvider.notifier).remove(subject.id);
-              Navigator.pop(ctx);
-            },
-            style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-            child: const Text('Supprimer'),
-          ),
-        ],
-      ),
+    showDeleteConfirmationDialog(
+      context,
+      title: 'Supprimer la matière ?',
+      message:
+          'Les tâches liées à « ${subject.name} » resteront mais ne seront '
+          'plus rattachées à une matière. Cette action est irréversible.',
+      onConfirm: () async {
+        await ref.read(subjectsControllerProvider.notifier).remove(subject.id);
+        if (context.mounted) {
+          showDeletedBanner(
+            context,
+            message: '« ${subject.name} » supprimée',
+            accentColor: AppColors.red,
+          );
+        }
+      },
     );
   }
 }
@@ -598,8 +592,18 @@ class _TodoTile extends ConsumerWidget {
             const SizedBox(width: 8),
             Checkbox(
               value: todo.done,
-              onChanged: (_) =>
-                  ref.read(todosControllerProvider.notifier).toggle(todo),
+              onChanged: (_) {
+                final wasDone = todo.done;
+                ref.read(todosControllerProvider.notifier).toggle(todo);
+                if (!wasDone) {
+                  showSubjectCompletedToast(
+                    context,
+                    itemName: todo.title,
+                    onUndo: () =>
+                        ref.read(todosControllerProvider.notifier).toggle(todo),
+                  );
+                }
+              },
               activeColor: AppColors.green,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
@@ -675,8 +679,17 @@ class _TodoTile extends ConsumerWidget {
               ),
             ),
             IconButton(
-              onPressed: () =>
-                  ref.read(todosControllerProvider.notifier).remove(todo.id),
+              onPressed: () => showDeleteConfirmationDialog(
+                context,
+                title: 'Supprimer la tâche ?',
+                message: '« ${todo.title} » sera supprimée définitivement.',
+                onConfirm: () async {
+                  await ref.read(todosControllerProvider.notifier).remove(todo.id);
+                  if (context.mounted) {
+                    showDeletedBanner(context, message: 'Tâche supprimée');
+                  }
+                },
+              ),
               icon: Icon(
                 Icons.delete_outline_rounded,
                 size: 18,

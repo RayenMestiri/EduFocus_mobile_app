@@ -34,23 +34,28 @@ class AppShell extends ConsumerWidget {
     return Scaffold(
       extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: SizeTransition(sizeFactor: animation, child: child),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(sizeFactor: animation, child: child),
+                ),
+                child: showBanner
+                    ? _SyncBanner(key: const ValueKey('banner'), status: sync)
+                    : const SizedBox.shrink(key: ValueKey('none')),
               ),
-              child: showBanner
-                  ? _SyncBanner(key: const ValueKey('banner'), status: sync)
-                  : const SizedBox.shrink(key: ValueKey('none')),
-            ),
-            _buildNavBar(),
-          ],
+              _buildNavBar(),
+            ],
+          ),
         ),
       ),
     );
